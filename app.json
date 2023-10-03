@@ -8,7 +8,7 @@
 			[
 				"expo-location",
 				{
-					"locationAlwaysAndWhenInUsePermission": "Allow Stumbl to use your location."
+					"locationAlwaysPermission": "Allow Stumbl to use your location."
 				}
 			],
 			[
@@ -36,7 +36,10 @@
 		},
 		"assetBundlePatterns": ["**/*", "assets/fonts/*"],
 		"ios": {
-			"supportsTablet": true
+			"supportsTablet": true,
+			"infoPlist": {
+				"UIBackgroundModes": ["location", "fetch"]
+			}
 		},
 		"android": {
 			"adaptiveIcon": {

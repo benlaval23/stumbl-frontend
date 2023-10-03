@@ -5,7 +5,7 @@ import SignUp from "../screens/SignUp";
 import Verification from "../screens/Verification";
 import HowItWorks from "../screens/HowItWorks";
 import SyncContacts from "../screens/SyncContacts";
-import SyncInstagram from "../screens/SyncInstagram";
+import AllowLocation from "../screens/AllowLocation";
 import ProfileSetup from "../screens/ProfileSetup";
 import Home from "../screens/Home";
 import { onAuthStateChanged, User } from "firebase/auth";
@@ -39,9 +39,9 @@ const AppNavigator = () => {
 						options={{ title: "Sync Contacts" }}
 					/>
 					<Stack.Screen
-						name='SyncInstagram'
-						component={SyncInstagram}
-						options={{ title: "Sync Instagram Contacts" }}
+						name='AllowLocation'
+						component={AllowLocation}
+						options={{ title: "Allow Location" }}
 					/>
 					<Stack.Screen
 						name='ProfileSetup'

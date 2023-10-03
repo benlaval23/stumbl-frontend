@@ -48,20 +48,20 @@ const ProfileSetup = ({ navigation }) => {
 	}, [user]);
 
 	const handleLocationEnableRequest = async () => {
-		if (isLocationsEnabled) {
-			setIsLocationsEnabled(false);
-		} else {
-			let { status } = await Location.requestForegroundPermissionsAsync();
-			if (status !== "granted") {
-				setErrorMsg("Permission to access location was denied");
-				return;
-			} else {
-				let location = await Location.getCurrentPositionAsync({});
-				setLocation(location);
-				setIsLocationsEnabled(true);
-				console.log(location);
-			}
-		}
+		// if (isLocationsEnabled) {
+		// 	setIsLocationsEnabled(false);
+		// } else {
+		// 	let { status } = await Location.requestForegroundPermissionsAsync();
+		// 	if (status !== "granted") {
+		// 		setErrorMsg("Permission to access location was denied");
+		// 		return;
+		// 	} else {
+		// 		let location = await Location.getCurrentPositionAsync({});
+		// 		setLocation(location);
+		// 		setIsLocationsEnabled(true);
+		// 		console.log(location);
+		// 	}
+		// }
 	};
 
 	const updateUserData = async () => {

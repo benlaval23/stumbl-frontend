@@ -1,6 +1,6 @@
 // screens/SyncContacts.js
 import React, { useEffect, useState } from "react";
-import { View, Text, Image, Button, Modal, StyleSheet } from "react-native";
+import { View, Text, Image, StyleSheet } from "react-native";
 import StepIndicator from "../components/StepIndicator";
 import * as Contacts from "expo-contacts";
 import { db, auth } from "../firebaseConfig";
@@ -10,8 +10,6 @@ import CustomButton from "../components/CustomButton";
 
 const SyncContacts = ({ navigation }) => {
 	const [loading, setLoading] = useState(false);
-
-	const [modalVisible, setModalVisible] = useState(false);
 	const [user, setUser] = useState(null);
 
 	useEffect(() => {
@@ -58,46 +56,22 @@ const SyncContacts = ({ navigation }) => {
 						}
 					}
 				}
-				setModalVisible(true);
 			}
 		}
-		navigation.navigate("SyncInstagram");
+		navigation.navigate("AllowLocation");
 		setLoading(false);
 	};
 
 	return (
 		<View style={styles.container}>
-			<Modal
-				animationType='none'
-				transparent={true}
-				visible={modalVisible}
-				onRequestClose={() => navigation.navigate("SyncInstagram")}
-			>
-				<View style={styles.centeredView}>
-					<View style={styles.modalView}>
-						<Text>Contacts are now synced</Text>
-						<View style={styles.buttonsContainer}>
-							<Button
-								title='Great'
-								onPress={() => {
-									setLoading(false);
-									setModalVisible(false);
-									navigation.navigate("SyncInstagram");
-								}}
-							/>
-						</View>
-					</View>
-				</View>
-			</Modal>
 			<StepIndicator totalSteps={4} currentStep={2} />
 			<Text style={styles.title}>Sync Your Contacts</Text>
-
 			<Image
-				source={require("../assets/images/womanWithLocationIcons.png")}
+				source={require("../assets/images/phoneContacts.png")}
 				style={styles.image}
 			/>
 			<Text style={styles.subtitle}>
-				Syncing your contacts allows Stumble to know who you are connected with. Stumble will never use thes contacts for anything other than establishing your connections. 
+				Syncing your contacts allows Stumbl to know who you are connected with. Stumbl will never use thes contacts for anything other than establishing your connections. 
 			</Text>
 			<CustomButton
 				loading={loading}
@@ -141,13 +115,6 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 		alignItems: "center",
 		backgroundColor: "rgba(0,0,0,0.4)", // Semi-transparent background
-	},
-	modalView: {
-		width: 300,
-		padding: 20,
-		backgroundColor: "white",
-		borderRadius: 8,
-		elevation: 5, // Android shadow
 	},
 	buttonsContainer: {
 		flexDirection: "row",

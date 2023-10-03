@@ -63,7 +63,7 @@ const Verification = ({ navigation, route }) => {
 			}
 
 			console.log("verified");
-			navigation.navigate("HowItWorks");
+			navigation.navigate("SyncContacts");
 			setLoading(false);
 		} catch (err) {
 			// showMessage({ text: `Error: ${err.message}`, color: 'red' });
