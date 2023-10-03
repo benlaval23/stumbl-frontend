@@ -2,8 +2,8 @@ import React from "react";
 import {
 	TouchableOpacity,
 	Text,
-	StyleSheet,
 	ActivityIndicator,
+	StyleSheet,
 } from "react-native";
 
 const CustomButton = ({ id, text, onPress, style, textStyle, loading }) => {
@@ -31,8 +31,9 @@ const styles = StyleSheet.create({
 	},
 	text: {
 		color: "#FFFFFF",
-		fontSize: 16,
+		fontSize: 20,
 		fontWeight: "600",
+		fontFamily: 'medium',
 	},
 });
 

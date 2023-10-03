@@ -7,6 +7,7 @@ import { db, auth } from "../firebaseConfig";
 import { setDoc, updateDoc, collection, getDoc, doc } from "firebase/firestore";
 import CustomButton from "../components/CustomButton";
 
+
 const SyncContacts = ({ navigation }) => {
 	const [loading, setLoading] = useState(false);
 
@@ -60,7 +61,7 @@ const SyncContacts = ({ navigation }) => {
 				setModalVisible(true);
 			}
 		}
-		navigation.navigate("ProfileSetup");
+		navigation.navigate("SyncInstagram");
 		setLoading(false);
 	};
 
@@ -70,7 +71,7 @@ const SyncContacts = ({ navigation }) => {
 				animationType='none'
 				transparent={true}
 				visible={modalVisible}
-				onRequestClose={() => navigation.navigate("ProfileSetup")}
+				onRequestClose={() => navigation.navigate("SyncInstagram")}
 			>
 				<View style={styles.centeredView}>
 					<View style={styles.modalView}>
@@ -81,7 +82,7 @@ const SyncContacts = ({ navigation }) => {
 								onPress={() => {
 									setLoading(false);
 									setModalVisible(false);
-									navigation.navigate("ProfileSetup");
+									navigation.navigate("SyncInstagram");
 								}}
 							/>
 						</View>
@@ -96,8 +97,7 @@ const SyncContacts = ({ navigation }) => {
 				style={styles.image}
 			/>
 			<Text style={styles.subtitle}>
-				Syncing your contacts allows you to easily connect with your friends and
-				family on Re-connect.
+				Syncing your contacts allows Stumble to know who you are connected with. Stumble will never use thes contacts for anything other than establishing your connections. 
 			</Text>
 			<CustomButton
 				loading={loading}
@@ -123,15 +123,18 @@ const styles = StyleSheet.create({
 		marginBottom: 40,
 	},
 	title: {
-		fontSize: 24,
+		fontSize: 32,
 		textAlign: "center",
-		marginBottom: 20,
+		marginBottom: 10,
+		color: "#537d8d",
+		fontFamily: "bold",
 	},
 	subtitle: {
 		fontSize: 16,
 		textAlign: "center",
 		marginBottom: 40,
 		color: "#666",
+		fontFamily: 'regular'
 	},
 	centeredView: {
 		flex: 1,

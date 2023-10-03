@@ -5,7 +5,7 @@ import {
 	AppState,
 	Text,
 	TextInput,
-	Button,
+	Image,
 	StyleSheet,
 	KeyboardAvoidingView,
 } from "react-native";
@@ -14,6 +14,7 @@ import { auth, db } from "../firebaseConfig";
 import CustomButton from "../components/CustomButton";
 import * as Clipboard from "expo-clipboard";
 import { PhoneAuthProvider, signInWithCredential } from "firebase/auth";
+import RNKeyboardAvoidingView from "../components/RNKeyboardAvoidingView";
 
 import CustomTextInput from "../components/CustomTextInput";
 
@@ -75,9 +76,13 @@ const Verification = ({ navigation, route }) => {
 		<KeyboardAvoidingView
 			style={styles.container}
 			behavior={Platform.OS === "ios" ? "padding" : "height"}
-			keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+			keyboardVerticalOffset={Platform.OS === "ios" ? 30 : 20}
 		>
-			<Text style={styles.title}>Enter Verification Code</Text>
+			<Text style={styles.title}>Verify</Text>
+			<Image
+				source={require("../assets/images/3PeopleTalking.png")}
+				style={styles.image}
+			/>
 			<Text style={styles.subtitle}>
 				We've sent a 6-digit code to you {phoneNumber}. Please enter it below.
 			</Text>
@@ -85,7 +90,7 @@ const Verification = ({ navigation, route }) => {
 			<View style={styles.codeContainer}>
 				<TextInput
 					style={styles.input}
-					placeholder='code'
+					placeholder='000000'
 					keyboardType='phone-pad'
 					onChangeText={setVerificationCode}
 					value={verificationCode}
@@ -110,26 +115,29 @@ const styles = StyleSheet.create({
 		backgroundColor: "white",
 	},
 	title: {
-		fontSize: 24,
+		fontSize: 32,
 		textAlign: "center",
 		marginBottom: 10,
+		color: "#537d8d",
+		fontFamily: "bold",
 	},
 	subtitle: {
 		fontSize: 16,
 		textAlign: "center",
 		marginBottom: 30,
 		color: "#666",
+		fontFamily: "regular",
 	},
 	info: {
 		fontSize: 16,
 		textAlign: "center",
 		marginBottom: 10,
 		color: "#666",
+		fontFamily: "regular",
 	},
 	input: {
-		flex: 1,
 		height: 60,
-		minWidth: 200,
+		minWidth: "100%",
 		backgroundColor: "#f0f0f0",
 		padding: 10,
 		borderRadius: 8,
@@ -138,13 +146,19 @@ const styles = StyleSheet.create({
 		color: "#313334",
 		textAlign: "center",
 		fontSize: 24,
+		fontFamily: "regular",
 	},
 	codeContainer: {
 		alignItems: "center",
 		justifyContent: "center",
 		height: 60,
-		marginTop: 20,
-		marginBottom: 30,
+		width: "100%",
+		margin: 20,
+	},
+	image: {
+		width: 380,
+		height: 300,
+		marginBottom: 20,
 	},
 });
 

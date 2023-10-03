@@ -1,63 +1,63 @@
 // screens/SyncInstagram.js
 import React from "react";
-import { View, Text, Button, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TextInput } from "react-native";
 import StepIndicator from "../components/StepIndicator";
+import CustomButton from "../components/CustomButton";
+import RNKeyboardAvoidingView from "../components/RNKeyboardAvoidingView";
 
-const SyncInstagram = ({ navigation, route }) => {
-	const user = route.params;
+import {
+	SafeAreaView,
+	SafeAreaProvider,
+	SafeAreaInsetsContext,
+	useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
+const SyncInstagram = ({ navigation }) => {
 	return (
-		<View style={styles.container}>
-			<StepIndicator totalSteps={4} currentStep={3} />
-			<Text style={styles.title}>Sync Instagram Contacts</Text>
-			<Text style={styles.subtitle}>
-				Sync your Instagram contacts to discover and connect with them on
-				Re-connect.
-			</Text>
-			<Button
-				style={styles.button}
-				title='Proceed to Profile Setup'
-				onPress={() => navigation.navigate("ProfileSetup", user)}
-			/>
-		</View>
+		<SafeAreaView style={styles.safeArea}>
+			<View style={styles.safeArea}>
+			<RNKeyboardAvoidingView style={styles.avoidingView}>
+				<StepIndicator totalSteps={4} currentStep={3} />
+				<View style={styles.titelContainer}>
+					<Text style={styles.title}>Sync Your Contacts</Text>
+				</View>
+				<View style={{ flex: 1 }}></View>
+				<View style={styles.buttonContainer}>
+					<CustomButton
+						// loading={loading}
+						style={styles.button}
+						text='Sync Contacts'
+						onPress={() => navigation.navigate("ProfileSetup")}
+					/>
+				</View>
+				<TextInput placeholder='Phone Number'
+					keyboardType='phone-pad'/>
+			</RNKeyboardAvoidingView>
+			</View>
+		</SafeAreaView>
 	);
 };
 
 const styles = StyleSheet.create({
-	container: {
+	safeArea: {
 		flex: 1,
-		padding: 16,
-		justifyContent: "center",
 		backgroundColor: "white",
 	},
+	avoidingView: {
+		paddingHorizontal: 24,
+		paddingTop: 10,
+		flex: 1,
+	},
+	titelContainer: {
+		padding: 20,
+	},
 	title: {
-		fontSize: 24,
-		textAlign: "center",
-		marginBottom: 20,
-	},
-	subtitle: {
-		fontSize: 16,
-		textAlign: "center",
-		marginBottom: 40,
-		color: "#666",
-	},
-	phoneInput: {
-		flex: 6,
-		marginLeft: 10,
-		height: 60,
-		backgroundColor: "#f0f0f0",
-		padding: 10,
-		borderRadius: 8,
-		alignItems: "center",
-		justifyContent: "center",
+		fontFamily: "bold",
+		fontSize: 32,
 		color: "#313334",
-		fontSize: 16,
-		marginTop: 0,
 	},
-	button: {
-		bottom: 40,
-		alignSelf: "center",
-		position: "absolute",
+	buttonContainer: {
+		paddingBottom: 0,
 	},
 });
 

@@ -11,19 +11,24 @@ const HowItWorks = ({ navigation }) => {
 		<View style={styles.container}>
 			<StepIndicator totalSteps={4} currentStep={1} />
 			<Text style={styles.title}>How it works</Text>
-			<Image
-				source={require("../assets/images/groupSocializingFun.png")}
-				style={styles.image}
-			/>
-
-			<Text style={styles.explainer}>Short explainer for the first image.</Text>
-			<Text style={styles.explainer}>
-				Logged in as {auth.currentUser?.uid}{" "}
-			</Text>
-
-			<Text style={styles.explainer}>
-				Short explainer for the second image.
-			</Text>
+			<View style={{marginTop: 40}}>
+				<View style={styles.feature}>
+					<Text style={styles.subTitle}>Sync your contacts</Text>
+					<Image
+						source={require("../assets/images/phoneContacts.png")}
+						style={{width: 180, height: 180}}
+					/>
+				</View>
+				<View style={styles.feature}>
+					<Text style={styles.subTitle}>
+						Get notified when old friends are nearby
+					</Text>
+					<Image
+						source={require("../assets/images/locationIconOnMap.png")}
+						style={{width: 180, height: 180}}
+					/>
+				</View>
+			</View>
 			<CustomButton
 				loading={loading}
 				style={styles.button}
@@ -46,19 +51,22 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 		backgroundColor: "white",
 	},
-	image: {
-		width: 320,
-		height: 200,
-		margin: 16,
-	},
-	explainer: {
-		marginBottom: 30,
-		textAlign: "center",
-	},
 	title: {
-		fontSize: 24,
+		fontSize: 32,
 		textAlign: "center",
-		marginBottom: 20,
+		color: "#537d8d",
+		fontFamily: "bold",
+	},
+	feature: {
+		flexDirection: 'row',
+		width: '100%',
+		justifyContent: "space-between",
+	},
+	subTitle: {
+		color: "#313334",
+		fontFamily: "medium",
+		fontSize: 28,
+		flex: 1,
 	},
 	button: {
 		bottom: 40,

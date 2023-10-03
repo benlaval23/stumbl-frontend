@@ -3,12 +3,9 @@ import {
 	View,
 	Text,
 	TextInput,
-	TouchableOpacity,
 	StyleSheet,
-	Button,
 	Image,
 	KeyboardAvoidingView,
-	TurboModuleRegistry,
 } from "react-native";
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { auth, app } from "../firebaseConfig";
@@ -45,6 +42,7 @@ const SignUp = ({ navigation }) => {
 			setErrorMessage("Invalid phone number format.");
 			console.error(errorMessage);
 			setIsInvalid(true);
+			setLoading(false);
 			return;
 		} else {
 			setIsInvalid(false);
@@ -56,6 +54,7 @@ const SignUp = ({ navigation }) => {
 			setErrorMessage("Invalid UK phone number length.");
 			console.error(errorMessage);
 			setIsInvalid(true);
+			setLoading(false);
 			return;
 		} else {
 			setIsInvalid(false);
@@ -109,7 +108,7 @@ const SignUp = ({ navigation }) => {
 			behavior={Platform.OS === "ios" ? "padding" : "height"}
 			keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
 		>
-			<Text style={styles.title}>Sign up to Stumbl</Text>
+			<Text style={styles.title}>Stumbl.</Text>
 			<Image
 				source={require("../assets/images/womanWithLocationIcons.png")}
 				style={styles.image}
@@ -162,11 +161,11 @@ const styles = StyleSheet.create({
 		marginBottom: 16,
 	},
 	title: {
-		fontSize: 24,
+		fontSize: 42,
 		textAlign: "center",
 		marginBottom: 20,
-		color: "#313334",
-		fontWeight: "bold",
+		color: "#537d8d",
+		fontFamily: "bold",
 	},
 	phoneContainer: {
 		flexDirection: "row",
