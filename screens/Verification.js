@@ -24,6 +24,8 @@ const Verification = ({ navigation, route }) => {
 	const verificationId = route.params[1];
 	const [loading, setLoading] = useState(false);
 
+
+
 	const handleVerification = async () => {
 		// Handle the verification logic here
 		setLoading(true);
@@ -75,8 +77,8 @@ const Verification = ({ navigation, route }) => {
 	return (
 		<KeyboardAvoidingView
 			style={styles.container}
-			behavior={Platform.OS === "ios" ? "padding" : "height"}
-			keyboardVerticalOffset={Platform.OS === "ios" ? 30 : 20}
+			behavior='position'
+			keyboardVerticalOffset={Platform.OS === "ios" ? 50 : 20}
 		>
 			<Text style={styles.title}>Verify</Text>
 			<Image
@@ -97,11 +99,14 @@ const Verification = ({ navigation, route }) => {
 					maxLength={6}
 				/>
 			</View>
-			<CustomButton
-				loading={loading}
-				onPress={handleVerification}
-				text='Verify'
-			/>
+			<View style={{marginLeft: 16, marginRight: 16}}>
+				<CustomButton
+					loading={loading}
+					
+					onPress={handleVerification}
+					text='Verify'
+				/>
+			</View>
 		</KeyboardAvoidingView>
 	);
 };

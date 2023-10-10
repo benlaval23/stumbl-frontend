@@ -28,11 +28,11 @@ const AppNavigator = () => {
 		<Stack.Navigator initialRouteName='SignUp'>
 			{user ? (
 				<>
-					<Stack.Screen
+					{/* <Stack.Screen
 						name='HowItWorks'
 						component={HowItWorks}
 						options={{ title: "How Re-connect Works" }}
-					/>
+					/> */}
 					<Stack.Screen
 						name='SyncContacts'
 						component={SyncContacts}

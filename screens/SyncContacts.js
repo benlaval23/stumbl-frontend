@@ -64,7 +64,7 @@ const SyncContacts = ({ navigation }) => {
 
 	return (
 		<View style={styles.container}>
-			<StepIndicator totalSteps={4} currentStep={2} />
+			<StepIndicator totalSteps={3} currentStep={1} />
 			<Text style={styles.title}>Sync Your Contacts</Text>
 			<Image
 				source={require("../assets/images/phoneContacts.png")}
