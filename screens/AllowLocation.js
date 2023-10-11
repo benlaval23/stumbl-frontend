@@ -62,14 +62,7 @@ const SyncInstagram = ({ navigation }) => {
 		config();
 		fetchUserData();
 	}, []);
-
-	// const handleLocationEnableRequest = () => {
-	// 	setLoading(true)
-	// 	startBackgroundLocation(user);
-	// 	navigation.navigate("ProfileSetup")
-	// 	setLoading(false)
-	// }
-
+	
 	return (
 		<View style={styles.container}>
 			<StepIndicator totalSteps={3} currentStep={2} />

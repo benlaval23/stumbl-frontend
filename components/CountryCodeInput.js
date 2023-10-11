@@ -18,7 +18,7 @@ const CountryCodeInput = ({ value, onChange }) => {
 				onPress={() => setShow(true)}
 				style={styles.countryCodeInput}
 			>
-				<Text>
+				<Text style={styles.text}>
 					{flag} {value}
 				</Text>
 			</TouchableOpacity>
@@ -52,8 +52,13 @@ const styles = StyleSheet.create({
 		borderRadius: 8,
 		alignItems: "center",
 		justifyContent: "center",
+
+	},
+	text: {
+		fontFamily: "regular",
+		fontSize: 18,	
 		color: "#313334",
-		fontSize: 16,
+
 	},
 	draw: {
 		modal: {

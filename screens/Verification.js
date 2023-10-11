@@ -2,21 +2,17 @@
 import React, { useState, useEffect } from "react";
 import {
 	View,
-	AppState,
 	Text,
 	TextInput,
 	Image,
 	StyleSheet,
 	KeyboardAvoidingView,
 } from "react-native";
-import { addDoc, collection, getDoc, doc, setDoc } from "firebase/firestore";
+import { getDoc, doc, setDoc } from "firebase/firestore";
 import { auth, db } from "../firebaseConfig";
 import CustomButton from "../components/CustomButton";
-import * as Clipboard from "expo-clipboard";
 import { PhoneAuthProvider, signInWithCredential } from "firebase/auth";
-import RNKeyboardAvoidingView from "../components/RNKeyboardAvoidingView";
 
-import CustomTextInput from "../components/CustomTextInput";
 
 const Verification = ({ navigation, route }) => {
 	const [verificationCode, setVerificationCode] = useState("");
@@ -27,7 +23,6 @@ const Verification = ({ navigation, route }) => {
 
 
 	const handleVerification = async () => {
-		// Handle the verification logic here
 		setLoading(true);
 		console.log("verification id " + verificationId);
 
@@ -39,14 +34,12 @@ const Verification = ({ navigation, route }) => {
 			const userCredential = await signInWithCredential(auth, credential);
 			const user = userCredential.user;
 
-			// Check if user already exists in Firestore
 			const userDoc = await getDoc(doc(db, "users", user.uid));
 			if (!userDoc.exists()) {
 				console.log("Adding user to DB");
-				// If user does not exist, add them to Firestore
 				await setDoc(doc(db, "users", user.uid), {
 					uid: user.uid,
-					name: "", // Default to an empty name, update later as necessary
+					name: "", 
 					phoneNumber: user.phoneNumber,
 					enabled: true,
 					createdAt: new Date(),
@@ -68,7 +61,6 @@ const Verification = ({ navigation, route }) => {
 			navigation.navigate("SyncContacts");
 			setLoading(false);
 		} catch (err) {
-			// showMessage({ text: `Error: ${err.message}`, color: 'red' });
 			console.log(err);
 		}
 		setLoading(false);
@@ -150,7 +142,7 @@ const styles = StyleSheet.create({
 		justifyContent: "center",
 		color: "#313334",
 		textAlign: "center",
-		fontSize: 24,
+		fontSize: 18,
 		fontFamily: "regular",
 	},
 	codeContainer: {

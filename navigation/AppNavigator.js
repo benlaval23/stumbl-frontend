@@ -36,22 +36,22 @@ const AppNavigator = () => {
 					<Stack.Screen
 						name='SyncContacts'
 						component={SyncContacts}
-						options={{ title: "Sync Contacts" }}
+						options={{ title: "Contacts" }}
 					/>
 					<Stack.Screen
 						name='AllowLocation'
 						component={AllowLocation}
-						options={{ title: "Allow Location" }}
+						options={{ title: "Location" }}
 					/>
 					<Stack.Screen
 						name='ProfileSetup'
 						component={ProfileSetup}
-						options={{ title: "Profile Setup" }}
+						options={{ title: "Setup" }}
 					/>
 					<Stack.Screen
 						name='Home'
 						component={Home}
-						options={{ title: "Home" }}
+						options={{headerLeft: null}}
 					/>
 				</>
 			) : (

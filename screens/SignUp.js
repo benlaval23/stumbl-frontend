@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import {
 	View,
 	Text,
@@ -7,17 +7,15 @@ import {
 	Image,
 	KeyboardAvoidingView,
 } from "react-native";
-import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { auth, app } from "../firebaseConfig";
 import CustomButton from "../components/CustomButton";
 import CountryCodeInput from "../components/CountryCodeInput";
-import { PhoneAuthProvider, signInWithCredential } from "firebase/auth";
+import { PhoneAuthProvider } from "firebase/auth";
 import {
 	FirebaseRecaptchaVerifierModal,
 	FirebaseRecaptchaBanner,
 } from "expo-firebase-recaptcha";
 
-// import { signInWithPhoneNumber } from "firebase/auth";
 
 const SignUp = ({ navigation }) => {
 	const [phoneNumber, setPhoneNumber] = useState("16505553434");
@@ -28,12 +26,6 @@ const SignUp = ({ navigation }) => {
 
 	const recaptchaVerifier = useRef(null);
 	const [verificationId, setVerificationId] = useState();
-
-	// useEffect(() => {
-	//     if (auth.currentUser) {
-	//         navigation.navigate('HowItWorks');
-	//     }
-	//   }, []);
 
 	const handleSignUp = async () => {
 		setLoading(true);
@@ -73,14 +65,11 @@ const SignUp = ({ navigation }) => {
 				recaptchaVerifier.current
 			);
 			setVerificationId(verificationId);
-			// showMessage({
-			//   text: 'Verification code has been sent to your phone.',
-			// });
+
 			console.log("sent code to " + fullPhoneNumber);
 			console.log("verficiation id " + verificationId);
 			navigation.navigate("Verification", [fullPhoneNumber, verificationId]);
 		} catch (err) {
-			// showMessage({ text: `Error: ${err.message}`, color: 'red' });
 			console.log(err);
 		}
 		setLoading(false);
@@ -184,7 +173,8 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		justifyContent: "center",
 		color: "#313334",
-		fontSize: 16,
+		fontSize: 18,
+		fontFamily: "regular",
 		marginTop: 0,
 	},
 	errorStyle: {
@@ -203,11 +193,6 @@ const styles = StyleSheet.create({
 		alignContent: "center",
 		alignItems: "center",
 		justifyContent: "center",
-	},
-	KeyboardAvoidingView: {
-		// flex: 1,
-		// justifyContent: 'center',
-		// paddingHorizontal: 20,
 	},
 });
 

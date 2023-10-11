@@ -1,9 +1,8 @@
 // screens/HowItWorks.js
 import React, { useState } from "react";
-import { View, Text, Image, Button, StyleSheet } from "react-native";
+import { View, Text, Image, StyleSheet } from "react-native";
 import CustomButton from "../components/CustomButton";
 import StepIndicator from "../components/StepIndicator";
-import { auth } from "../firebaseConfig";
 
 const HowItWorks = ({ navigation }) => {
 	const [loading, setLoading] = useState(false);

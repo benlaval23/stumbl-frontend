@@ -1,190 +1,105 @@
 // screens/HowItWorks.js
-import React, { useEffect, useState } from 'react';
-import { View, Text, Button, StyleSheet, FlatList, SectionList, TouchableOpacity } from 'react-native';
-import { auth, db } from '../firebaseConfig';
-import { getDoc, doc } from 'firebase/firestore'
-
-
-
-const dummyConnections = [
-  {
-    primaryUserId: 'xxxx2',
-    secondaryUserId: 'xxxx',
-    secondaryUsername: 'Thomas Finch',
-    distance: 1,
-    timestamp: '01:01:2020'
-  },
-  {
-    primaryUserId: 'xxxx3',
-    secondaryUserId: 'xxxx',
-    secondaryUsername: 'Henry Clark',
-    distance: 2,
-    timestamp: '01:01:2020'
-  },
-  {
-    primaryUserId: 'xxxx4',
-    secondaryUserId: 'xxxx',
-    secondaryUsername: 'Charlie Stannard',
-    distance: 10,
-    timestamp: '01:01:2020'
-  },
-  {
-    primaryUserId: 'xxxx1',
-    secondaryUserId: 'xxxx',
-    secondaryUsername: 'Hector forwood',
-    distance: 20,
-    timestamp: '01:01:2020'
-  },
-  {
-    primaryUserId: 'xxxx1',
-    secondaryUserId: 'xxxx',
-    secondaryUsername: 'Hector forwood',
-    distance: 20,
-    timestamp: '01:01:2020'
-  },
-]
+import React, { useEffect, useState } from "react";
+import {
+	View,
+	Text,
+	StyleSheet,
+	TouchableOpacity,
+} from "react-native";
+import { auth, db } from "../firebaseConfig";
+import { getDoc, doc } from "firebase/firestore";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 const Home = ({ navigation }) => {
-  const [user, setUser] = useState(null);
-  const [activeConnections, setActiveConnections] = useState([]);
-  const [inactiveConnections, setInactiveConnections] = useState([]);
+	const [user, setUser] = useState(null);
+	const [connectionDistance, setConnectionDistance] = useState();
 
+	const handleSignOut = () => {
+		auth
+			.signOut()
+			.then(() => {
+				navigation.replace("SignUp");
+			})
+			.catch((error) => alert.apply(error.message));
+	};
 
-  const handleSignOut = () => {
-    auth
-    .signOut()
-    .then(() => {
-      navigation.replace('SignUp')
-    })
-    .catch(error => alert.apply(error.message))
-  }
+	useEffect(() => {
+		const fetchUserData = async () => {
+			try {
+				const userDoc = await getDoc(doc(db, "users", auth.currentUser?.uid));
+				if (userDoc.exists()) {
+					setUser(userDoc.data());
+				}
+			} catch (error) {
+				console.error("Error fetching user:", error);
+			}
+		};
+		fetchUserData();
+	}, []);
 
-  const renderConnection = ({ item }) => (
-    <TouchableOpacity style={styles.connectionItem}>
-      <View style={styles.avatar}>
-        <Text style={styles.avatarText}>{item.secondaryUsername.charAt(0)}</Text>
-      </View>
-      <View style={styles.connectionInfo}>
-        <Text style={styles.connectionName}>{item.secondaryUsername}</Text>
-        <Text style={styles.connectionMessage}>
-          is {item.distance} km away from you. Send them a message to meet up!
-        </Text>
-      </View>
-    </TouchableOpacity>
-  );
+	useEffect(() => {
+		if (
+			user &&
+			user.notificationSettings &&
+			user.notificationSettings.rules &&
+			user.notificationSettings.rules.home
+		) {
+			setConnectionDistance(user.notificationSettings.rules.home);
+		}
+	}, [user]);
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const userDoc = await getDoc(doc(db, 'users', auth.currentUser?.uid));
-        if (userDoc.exists()) {
-          setUser(userDoc.data());
-        }
-      } catch (error) {
-        console.error("Error fetching user:", error);
-      }
-    };
-    fetchUserData();
-  }, []); // This effect only runs once when the component is mounted
+	return (
+		<View style={styles.container}>
+			<View style={styles.topBar}>
+				<Text style={styles.topBarText}>{auth.currentUser?.phoneNumber} </Text>
+				<TouchableOpacity onPress={handleSignOut}>
+					<Ionicons name='log-out-outline' size={24} color='white' />
+				</TouchableOpacity>
+			</View>
 
-  useEffect(() => {
-    if (user) {
-      const maxDistance = user?.notificationSettings.rules.home;
-      setActiveConnections(dummyConnections.filter(connection => connection.distance <= maxDistance));
-      setInactiveConnections(dummyConnections.filter(connection => connection.distance > maxDistance));
-    }
-  }, [user]);
-
-
-  return (
-    <View style={styles.container}>
-      <Text style={styles.explainer}>Logged in as {auth.currentUser?.phoneNumber} </Text>
-      <Button title="Sign Out" onPress={handleSignOut}/>
-     <View style={styles.bottomSheet}>
-      <View style={styles.list} >
-        <Text style={styles.subTitle} >Live Connections</Text>
-        <FlatList
-          data={activeConnections} // You might want to use activeConnections and inactiveConnections as you have defined above
-          renderItem={renderConnection}
-          keyExtractor={(item) => item.secondaryUserId}
-        />
-        </View>
-        <View style={styles.list} >
-          <Text style={styles.subTitle} >Connections</Text>
-        <FlatList
-          data={inactiveConnections} // You might want to use activeConnections and inactiveConnections as you have defined above
-          renderItem={renderConnection}
-          keyExtractor={(item) => item.secondaryUserId}
-        />
-        <Button title="Sign Out" onPress={handleSignOut}/>
-        </View>
-      </View>
-    </View>
-  );
+			<View style={styles.icon}>
+				<Ionicons name='notifications' size={180} color='#D15859' />
+				<Text style={styles.status}>
+					You'll be notified when contacts are {connectionDistance}km
+					from you.
+				</Text>
+			</View>
+		</View>
+	);
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 16,
-    backgroundColor: '#313334',
-  },
-  explainer: {
-    marginBottom: 10,
-    textAlign: 'center',
-    color: 'white',
-  },
-  connectionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E5E5',
-  },
-  avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#B5EAD7',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 10,
-  },
-  avatarText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  connectionInfo: {
-    flex: 1,
-  },
-  connectionName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  connectionMessage: {
-    fontSize: 14,
-    color: '#777',
-  },
-  subTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    color: '#537d8d' // Color to match the invite button, for consistency.
-  },
-  list:{
-    marginTop: 16,
-  },
-  bottomSheet: {
-    backgroundColor: '#f0f0f0',
-    bottom: 0,
-    width: '100%',
-    borderRadius: 16,
-    height: '60%',
-    position: 'absolute',  
-    padding: 16,    
-  }
+	container: {
+		flex: 1,
+		backgroundColor: "#313334",
+	},
+	topBarText: {
+		color: "white",
+		fontFamily: "regular",
+		fontSize: 18,
+	},
+	icon: {
+		alignSelf: "center",
+		alignItems: "center",
+		marginTop: "30%",
+		justifySelf: "center",
+	},
+	status: {
+		color: "white",
+		maxWidth: "80%",
+		textAlign: "center",
+		alignSelf: "center",
+		fontFamily: "regular",
+		fontSize: 24,
+		marginTop: 10,
+	},
+	topBar: {
+		height: 80,
+		flexDirection: "row",
+		padding: 24,
+		alignItems: "center",
+		justifyContent: "space-between",
+	},
 });
 
 export default Home;

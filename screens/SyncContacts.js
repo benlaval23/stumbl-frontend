@@ -34,24 +34,20 @@ const SyncContacts = ({ navigation }) => {
 			const { data } = await Contacts.getContactsAsync({});
 
 			if (data.length > 0 && user) {
-				const userRef = doc(db, "users", user.uid); // Reference to the user's document
-				const contactsCollectionRef = collection(userRef, "contacts"); // Reference to the subcollection
+				const userRef = doc(db, "users", user.uid); 
+				const contactsCollectionRef = collection(userRef, "contacts"); 
 				console.log("fetched contacts");
 
-				// Iterate over the contacts and add each to the subcollection
 				for (const contact of data) {
-					const contactId = contact.id; // assuming that each contact has at least one phone number
+					const contactId = contact.id; 
 
 					if (contactId) {
-						// only proceed if we have an ID (phone number)
-						const contactRef = doc(contactsCollectionRef, contactId); // Reference to the specific contact
+						const contactRef = doc(contactsCollectionRef, contactId); 
 						const contactSnap = await getDoc(contactRef);
 
 						if (contactSnap.exists()) {
-							// Contact exists, update it
 							await updateDoc(contactRef, contact);
 						} else {
-							// Contact doesn't exist, add it
 							await setDoc(contactRef, contact);
 						}
 					}
@@ -114,7 +110,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: "center",
 		alignItems: "center",
-		backgroundColor: "rgba(0,0,0,0.4)", // Semi-transparent background
+		backgroundColor: "rgba(0,0,0,0.4)", 
 	},
 	buttonsContainer: {
 		flexDirection: "row",

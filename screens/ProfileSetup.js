@@ -3,28 +3,56 @@ import React, { useEffect, useState } from "react";
 import {
 	View,
 	Text,
-	Button,
 	StyleSheet,
-	Switch,
-	FlatList,
-	Keyboard,
-	TouchableOpacity,
-	TextInput,
+	Image,
 } from "react-native";
 import StepIndicator from "../components/StepIndicator";
 import { auth, db } from "../firebaseConfig";
-import { addDoc, updateDoc, collection, getDoc, doc } from "firebase/firestore";
+import { updateDoc, getDoc, doc } from "firebase/firestore";
+import RNPickerSelect from "react-native-picker-select";
 import CustomButton from "../components/CustomButton";
-import * as Notifications from 'expo-notifications';
+import * as Notifications from "expo-notifications";
 
+const options = [
+	{
+		label: "0.5km",
+		value: 0.5,
+	},
+	{
+		label: "1km",
+		value: 1,
+	},
+	{
+		label: "2km",
+		value: 2,
+	},
+	{
+		label: "3km",
+		value: 3,
+	},
+	{
+		label: "5km",
+		value: 5,
+	},
+	{
+		label: "7.5km",
+		value: 7.5,
+	},
+	{
+		label: "10km",
+		value: 10,
+	},
+	{
+		label: "20km",
+		value: 20,
+	},
+];
 
 const ProfileSetup = ({ navigation }) => {
 	// For demonstration purposes only: you'll probably want to store these in your component's state or some global state later
 	const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(false);
-	const [isLocationsEnabled, setIsLocationsEnabled] = useState(false);
-	const [connectionDistance, setConnectionDistance] = useState("");
+	const [connectionDistance, setConnectionDistance] = useState(1);
 	const [user, setUser] = useState(null);
-	const [location, setLocation] = useState(null);
 	const [loading, setLoading] = useState(false);
 
 	useEffect(() => {
@@ -41,26 +69,21 @@ const ProfileSetup = ({ navigation }) => {
 
 		const requestNotificationPermission = async () => {
 			try {
-			  const { status } = await Notifications.requestPermissionsAsync();
-			  if (status === 'granted') {
-				console.log('Notification permissions granted!');
-			  } else {
-				console.log('Notification permissions denied!');
-			  }
+				const { status } = await Notifications.requestPermissionsAsync();
+				if (status === "granted") {
+					console.log("Notification permissions granted!");
+					setIsNotificationsEnabled(true);
+				} else {
+					console.log("Notification permissions denied!");
+				}
 			} catch (error) {
-			  console.error('Failed to request notification permission:', error);
+				console.error("Failed to request notification permission:", error);
 			}
-		  };
+		};
 
 		fetchUserData();
 		requestNotificationPermission();
-
-		if (user) {
-			setIsLocationsEnabled(user.locationEnabled);
-			setIsNotificationsEnabled(user.notificationSettings.enabled);
-			setConnectionDistance(user.notificationSettings.rules.home);
-		}
-	}, [user]);
+	}, []);
 
 	const updateUserData = async () => {
 		try {
@@ -68,8 +91,6 @@ const ProfileSetup = ({ navigation }) => {
 			await updateDoc(userRef, {
 				"notificationSettings.enabled": isNotificationsEnabled,
 				"notificationSettings.rules.home": connectionDistance,
-				locationEnabled: isLocationsEnabled,
-				lastLocationData: location,
 			});
 			console.log("User data updated successfully.");
 		} catch (error) {
@@ -85,66 +106,34 @@ const ProfileSetup = ({ navigation }) => {
 	};
 
 	return (
-		// <View style={styles.container}>
-		// 	<StepIndicator totalSteps={3} currentStep={2} />
-		// 	<Text style={styles.title}>Location Permissions</Text>
-
-		// 	{/* <Image
-		// 		source={require("../assets/images/locationIconOnMap.png")}
-		// 		style={styles.image}
-		// 	/> */}
-		// 	<Text style={styles.subtitle}>
-		// 		Allowing location permissions allows Stumble to notify you when one of
-		// 		your contacts are nearby.
-		// 	</Text>
-		// 	<View style={styles.subMenu}>
-		// 		<Text style={styles.subMenuTitle}>Notifications</Text>
-		// 		<View style={styles.notificationOption}>
-		// 			<Text>Enabled</Text>
-		// 			<Switch
-		// 				trackColor={{ false: "#767577", true: "#537d88" }}
-		// 				thumbColor={isNotificationsEnabled ? "#1b0ffd" : "#f4f3f4"}
-		// 				ios_backgroundColor='#3e3e3e'
-		// 				value={isNotificationsEnabled}
-		// 				onValueChange={(value) => setIsNotificationsEnabled(value)}
-		// 			/>
-		// 		</View>
-		// 		<View style={styles.notificationOption}>
-		// 			<Text>Notify me when connections within: </Text>
-		// 			<TextInput
-		// 				style={styles.input}
-		// 				value={connectionDistance}
-		// 				keyboardType='numeric'
-		// 				onChangeText={(value) => setConnectionDistance(value)}
-		// 			/>
-		// 			<Text>Km</Text>
-		// 		</View>
-		// 	</View>
-		// 	<CustomButton
-		// 		loading={loading}
-		// 		style={styles.button}
-		// 		text='Finish Setup'
-		// 		onPress={handleFinishSignUp}
-		// 	/>
-		// </View>
 		<View style={styles.container}>
-		<StepIndicator totalSteps={3} currentStep={3} />
-		<Text style={styles.title}>Notifications Setup</Text>
-{/* 
+			<StepIndicator totalSteps={3} currentStep={3} />
+			<Text style={styles.title}>Notifications Setup</Text>
+			
 		<Image
-			source={require("../assets/images/locationIconOnMap.png")}
+			source={require("../assets/images/bellOnAMap.png")}
 			style={styles.image}
-		/> */}
-		<Text style={styles.subtitle}>
-			We need your notifications turned on
-		</Text>
-		<CustomButton
-			loading={loading}
-			style={styles.button}
-			text='Finish set up'
-			// onPress={}
 		/>
-	</View>
+			<Text style={styles.subtitle}>Get notified when your connections are within...</Text>
+			<View style={styles.selectContainer} >
+				<RNPickerSelect
+					style={{
+						inputIOS: styles.select,
+						inputAndroid: styles.select,
+						// ... any other platform specific styles you want
+					}}
+					items={options}
+					onValueChange={setConnectionDistance}
+					value={connectionDistance}
+				/>
+			</View>
+			<CustomButton
+				loading={loading}
+				style={styles.button}
+				text='Finish set up'
+				onPress={handleFinishSignUp}
+			/>
+		</View>
 	);
 };
 
@@ -171,7 +160,7 @@ const styles = StyleSheet.create({
 	subtitle: {
 		fontSize: 16,
 		textAlign: "center",
-		marginBottom: 40,
+		marginBottom: 20,
 		color: "#666",
 		fontFamily: "regular",
 	},
@@ -185,6 +174,21 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		justifyContent: "space-between",
 		marginTop: 15,
+	},
+	selectContainer: {
+		height: 60,
+		width: "100%",
+		backgroundColor: "#f0f0f0",
+		padding: 10,
+		borderRadius: 8,
+		alignItems: "center",
+		justifyContent: "center",
+	},
+	select: {
+		color: "#313334",
+		textAlign: "center",
+		fontSize: 18,
+		fontFamily: "regular",
 	},
 	button: {
 		bottom: 40,
