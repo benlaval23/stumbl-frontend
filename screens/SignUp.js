@@ -67,7 +67,6 @@ const SignUp = ({ navigation }) => {
 			setVerificationId(verificationId);
 
 			console.log("sent code to " + fullPhoneNumber);
-			console.log("verficiation id " + verificationId);
 			navigation.navigate("Verification", [fullPhoneNumber, verificationId]);
 		} catch (err) {
 			console.log(err);

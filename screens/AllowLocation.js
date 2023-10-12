@@ -3,66 +3,34 @@ import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
 import StepIndicator from "../components/StepIndicator";
 import CustomButton from "../components/CustomButton";
-import { db, auth } from "../firebaseConfig";
-import { getDoc, doc, addDoc } from "firebase/firestore";
 import * as Location from "expo-location";
-import * as TaskManager from "expo-task-manager";
+import * as LocationTasks from '../hooks/locationTask'
+import { startLocationTracking } from '../hooks/locationTask'
 
-const LOCATION_TRACKING = "location-tracking";
+
 
 const SyncInstagram = ({ navigation }) => {
 	const [loading, setLoading] = useState(false);
-	const [user, setUser] = useState(null);
 
-	const [locationStarted, setLocationStarted] = useState(false);
-
-	const startLocationTracking = async () => {
+	const handleStartLocationTracking = async () => {
 		setLoading(true);
-
-		await Location.startLocationUpdatesAsync(LOCATION_TRACKING, {
-			accuracy: Location.Accuracy.Highest,
-			timeInterval: 3600,
-			distanceInterval: 0,
-		});
-		const hasStarted = await Location.hasStartedLocationUpdatesAsync(
-			LOCATION_TRACKING
-		);
-		setLocationStarted(hasStarted);
-		console.log("tracking started?", hasStarted);
+		startLocationTracking();
 		navigation.navigate("ProfileSetup");
 		setLoading(false);
 	};
 
-	const startLocation = () => {
-		startLocationTracking();
-	};
-
 	useEffect(() => {
-		const fetchUserData = async () => {
-			try {
-				const userDoc = await getDoc(doc(db, "users", auth.currentUser?.uid));
-				if (userDoc.exists()) {
-					setUser(userDoc.data());
-				}
-			} catch (error) {
-				console.error("Error fetching user:", error);
+		const requestLocationPermission = async () => {
+			let { status } = await Location.requestBackgroundPermissionsAsync();
+			if (status !== 'granted') {
+			  console.error('Permission to access location was denied');
+			  return;
 			}
 		};
 
-		const config = async () => {
-			let resf = await Location.requestForegroundPermissionsAsync();
-			let resb = await Location.requestBackgroundPermissionsAsync();
-			if (resf.status != "granted" && resb.status !== "granted") {
-				console.log("Permission to access location was denied");
-			} else {
-				console.log("Permission to access location granted");
-			}
-		};
-
-		config();
-		fetchUserData();
+		requestLocationPermission();
 	}, []);
-	
+
 	return (
 		<View style={styles.container}>
 			<StepIndicator totalSteps={3} currentStep={2} />
@@ -79,46 +47,12 @@ const SyncInstagram = ({ navigation }) => {
 			<CustomButton
 				loading={loading}
 				style={styles.button}
-				text='Give Location Permissios'
-				onPress={startLocation}
+				text='Start Location Tracking'
+				onPress={handleStartLocationTracking}
 			/>
 		</View>
 	);
 };
-
-TaskManager.defineTask(LOCATION_TRACKING, async ({ data, error }) => {
-	if (error) {
-		console.log("LOCATION_TRACKING task ERROR:", error);
-		return;
-	}
-	if (data) {
-		const { locations } = data;
-		let lat = locations[0].coords.latitude;
-		let long = locations[0].coords.longitude;
-
-		l1 = lat;
-		l2 = long;
-
-		console.log(`${new Date(Date.now()).toLocaleString()}: ${lat},${long}`);
-
-		if (user) {
-			try {
-				const locationCollectionRef = collection(
-					doc(db, "users", user.uid),
-					"locations"
-				);
-				const docRef = await addDoc(locationCollectionRef, {
-					latitude: lat,
-					longitude: long,
-					timestamp: new Date(),
-				});
-				console.log("Document added with ID: ", docRef.id);
-			} catch (error) {
-				console.error("Error adding users location to sub-collection: ", error);
-			}
-		}
-	}
-});
 
 const styles = StyleSheet.create({
 	container: {

@@ -24,7 +24,6 @@ const Verification = ({ navigation, route }) => {
 
 	const handleVerification = async () => {
 		setLoading(true);
-		console.log("verification id " + verificationId);
 
 		try {
 			const credential = PhoneAuthProvider.credential(
