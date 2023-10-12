@@ -1,6 +1,7 @@
 import * as TaskManager from "expo-task-manager";
 import * as BackgroundFetch from "expo-background-fetch";
 import * as Location from "expo-location";
+import { Platform } from "react-native";
 import { auth, db } from "../firebaseConfig";
 import {
 	updateDoc,
@@ -12,9 +13,23 @@ import {
 	where,
 } from "firebase/firestore";
 import { haversineDistance } from "./distance";
-
 const LOCATION_TRACKING = "location-tracking";
 const BACKGROUND_FETCH_TASK = "background-fetch-task";
+import * as Notifications from "expo-notifications";
+import * as Device from "expo-device";
+import Constants from "expo-constants";
+
+const sendNotifications = (notificationsToSend) => {
+
+	const expoPushToken = registerForPushNotificationsAsync();
+
+    notificationsToSend.forEach((notification) => {
+        const friend = notification?.user?.phoneNumber
+        const distance = String(notification?.distance)
+        const body = `Your friend ${friend} is ${distance}km away`
+        sendPushNotification(expoPushToken, body);
+    })
+};
 
 const checkDistance = async (user, matchedUser) => {
 	try {
@@ -90,7 +105,7 @@ const findUserMatches = async (user) => {
 					userMatches.push(matchedUser);
 				});
 			} catch (e) {
-				console.log("error with findin phone nmber iin batch", e);
+				console.log("error with findin phone nmber in batch", e);
 			}
 		}
 	} catch (error) {
@@ -123,6 +138,7 @@ const updateLocationData = async (latestLocation) => {
 		);
 		console.log(distances);
 		const notificationsToSend = distances.filter(Boolean);
+        sendNotifications(notificationsToSend);
 
 		console.log("notifications to send: ", notificationsToSend);
 	} catch (error) {
@@ -156,6 +172,17 @@ const registerBackgroundFetch = async () => {
 	});
 };
 
+async function fetchData() {
+	try {
+		const latestLocation = await Location.getCurrentPositionAsync({});
+		console.log("fetchData()" + location);
+		updateLocationData(latestLocation);
+	} catch (error) {
+		console.error(error);
+		return false; // Indicates no new data.
+	}
+}
+
 TaskManager.defineTask(LOCATION_TRACKING, async ({ data, error }) => {
 	if (error) {
 		console.log("LOCATION_TRACKING task ERROR:", error);
@@ -168,20 +195,74 @@ TaskManager.defineTask(LOCATION_TRACKING, async ({ data, error }) => {
 	}
 });
 
-async function fetchData() {
-	try {
-		const latestLocation = await Location.getCurrentPositionAsync({});
-		console.log("fetchData()" + location);
-		updateLocationData(latestLocation);
-	} catch (error) {
-		console.error(error);
-		return false; // Indicates no new data.
-	}
-}
-
 TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
 	const receivedNewData = await fetchData(); // you can call your location updates or other data fetching logic here
 	return receivedNewData
 		? BackgroundFetch.Result.NewData
 		: BackgroundFetch.Result.NoData;
 });
+
+// notifications
+Notifications.setNotificationHandler({
+	handleNotification: async () => ({
+		shouldShowAlert: true,
+		shouldPlaySound: false,
+		shouldSetBadge: false,
+	}),
+});
+
+// Can use this function below or use Expo's Push Notification Tool from: https://expo.dev/notifications
+async function sendPushNotification(expoPushToken, body) {
+	const message = {
+		to: expoPushToken,
+		sound: "default",
+		title: "Friends nearby!",
+		body: body,
+		data: { someData: "goes here" },
+	};
+
+	await fetch("https://exp.host/--/api/v2/push/send", {
+		method: "POST",
+		headers: {
+			Accept: "application/json",
+			"Accept-encoding": "gzip, deflate",
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify(message),
+	});
+}
+
+async function registerForPushNotificationsAsync() {
+	let token;
+
+	if (Platform.OS === "android") {
+		Notifications.setNotificationChannelAsync("default", {
+			name: "default",
+			importance: Notifications.AndroidImportance.MAX,
+			vibrationPattern: [0, 250, 250, 250],
+			lightColor: "#FF231F7C",
+		});
+	}
+
+	if (Device.isDevice) {
+		const { status: existingStatus } =
+			await Notifications.getPermissionsAsync();
+		let finalStatus = existingStatus;
+		if (existingStatus !== "granted") {
+			const { status } = await Notifications.requestPermissionsAsync();
+			finalStatus = status;
+		}
+		if (finalStatus !== "granted") {
+			alert("Failed to get push token for push notification!");
+			return;
+		}
+		token = await Notifications.getExpoPushTokenAsync({
+			projectId: Constants.expoConfig.extra.eas.projectId,
+		});
+		console.log(token);
+	} else {
+		alert("Must use physical device for Push Notifications");
+	}
+
+	return token;
+}
