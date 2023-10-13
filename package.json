@@ -22,16 +22,21 @@
     "expo-background-fetch": "~11.3.0",
     "expo-build-properties": "~0.8.3",
     "expo-clipboard": "~4.3.1",
+    "expo-constants": "~14.4.2",
     "expo-contacts": "~12.2.0",
+    "expo-device": "~5.4.0",
     "expo-firebase-auth": "^2.0.0",
     "expo-firebase-core": "^6.0.0",
     "expo-firebase-recaptcha": "^2.3.1",
     "expo-font": "~11.4.0",
     "expo-location": "~16.1.0",
     "expo-notifications": "~0.20.1",
+    "expo-splash-screen": "~0.20.5",
     "expo-status-bar": "~1.6.0",
     "expo-task-manager": "~11.3.0",
     "firebase": "^10.4.0",
+    "firebase-admin": "^11.11.0",
+    "firebase-functions": "^4.4.1",
     "install": "^0.13.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -43,10 +48,7 @@
     "react-native-safe-area-context": "4.6.3",
     "react-native-toast-message": "^2.1.6",
     "react-native-web": "~0.19.6",
-    "react-native-webview": "13.2.2",
-    "expo-splash-screen": "~0.20.5",
-    "expo-device": "~5.4.0",
-    "expo-constants": "~14.4.2"
+    "react-native-webview": "13.2.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
