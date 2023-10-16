@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
 	warningText: {
 		color: "#D15859",
 		marginTop: 10,
-		fontSize: 12,
+		fontSize: 14,
 	},
 	captcha: {
 		margin: 8,

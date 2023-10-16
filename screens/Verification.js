@@ -9,18 +9,20 @@ import {
 	KeyboardAvoidingView,
 } from "react-native";
 import { getDoc, doc, setDoc } from "firebase/firestore";
-import { auth, db } from "../firebaseConfig";
+import { auth, db, functions } from "../firebaseConfig";
 import CustomButton from "../components/CustomButton";
 import { PhoneAuthProvider, signInWithCredential } from "firebase/auth";
+import { httpsCallable } from "firebase/functions";
 
+const addUser = httpsCallable(functions, "addUser");
 
 const Verification = ({ navigation, route }) => {
 	const [verificationCode, setVerificationCode] = useState("");
 	const phoneNumber = route.params[0];
 	const verificationId = route.params[1];
 	const [loading, setLoading] = useState(false);
-
-
+	const [isError, setIsError] = useState(false);
+	const [errorMessage, setErrorMessage] = useState("");
 
 	const handleVerification = async () => {
 		setLoading(true);
@@ -33,34 +35,49 @@ const Verification = ({ navigation, route }) => {
 			const userCredential = await signInWithCredential(auth, credential);
 			const user = userCredential.user;
 
-			const userDoc = await getDoc(doc(db, "users", user.uid));
-			if (!userDoc.exists()) {
-				console.log("Adding user to DB");
-				await setDoc(doc(db, "users", user.uid), {
-					uid: user.uid,
-					name: "", 
-					phoneNumber: user.phoneNumber,
-					enabled: true,
-					createdAt: new Date(),
-					updatedAt: new Date(),
-					notificationSettings: {
-						enabled: false,
-						homeCountry: "",
-						rules: {
-							home: 5,
-							abroad: 50,
-						},
+			await addUser({
+				uid: user.uid,
+				name: "",
+				phoneNumber: user.phoneNumber,
+				enabled: true,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+				notificationSettings: {
+					enabled: false,
+					homeCountry: "",
+					rules: {
+						home: 5,
+						abroad: 50,
 					},
-					locationEnabled: false,
-					exclusionList: [],
-				});
-			}
+				},
+				locationEnabled: false,
+				exclusionList: [],
+			})
+				.then((result) => {
+					const data = result.data;
+					const success = data.success;
 
-			console.log("verified");
-			navigation.navigate("SyncContacts");
-			setLoading(false);
+					if (success) {
+						console.log(data.message);
+						navigation.navigate("SyncContacts");
+						setLoading(false);
+					} else {
+						setIsError(true);
+						setErrorMessage("Error signing in user (code:2): ", data.message);
+						console.log(data.message);
+						setLoading(false);
+					}
+				})
+				.catch((error) => {
+					setIsError(true);
+					setErrorMessage("Error signing in user (code:1): ", error);
+					setLoading(false);
+				});
 		} catch (err) {
 			console.log(err);
+			setIsError(true);
+			setErrorMessage("Incorrect code");
+			setLoading(false);
 		}
 		setLoading(false);
 	};
@@ -82,7 +99,11 @@ const Verification = ({ navigation, route }) => {
 			<Text style={styles.info}>Not received code? Resend in 40 seconds.</Text>
 			<View style={styles.codeContainer}>
 				<TextInput
-					style={styles.input}
+					style={
+						isError & (errorMessage === "Incorrect code")
+							? [styles.input, styles.errorStyle]
+							: styles.input
+					}
 					placeholder='000000'
 					keyboardType='phone-pad'
 					onChangeText={setVerificationCode}
@@ -90,13 +111,13 @@ const Verification = ({ navigation, route }) => {
 					maxLength={6}
 				/>
 			</View>
-			<View style={{marginLeft: 16, marginRight: 16}}>
+			<View style={{ marginLeft: 16, marginRight: 16 }}>
 				<CustomButton
 					loading={loading}
-					
 					onPress={handleVerification}
 					text='Verify'
 				/>
+				{isError && <Text style={styles.warningText}>{errorMessage}</Text>}
 			</View>
 		</KeyboardAvoidingView>
 	);
@@ -150,6 +171,16 @@ const styles = StyleSheet.create({
 		height: 60,
 		width: "100%",
 		margin: 20,
+	},
+	errorStyle: {
+		borderWidth: 1,
+		borderColor: "#D15859",
+	},
+	warningText: {
+		color: "#D15859",
+		marginTop: 10,
+		fontSize: 14,
+		textAlign: "center",
 	},
 	image: {
 		width: 380,

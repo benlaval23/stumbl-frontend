@@ -7,11 +7,14 @@ import {
 	Image,
 } from "react-native";
 import StepIndicator from "../components/StepIndicator";
-import { auth, db } from "../firebaseConfig";
+import { auth, db, functions } from "../firebaseConfig";
 import { updateDoc, getDoc, doc } from "firebase/firestore";
 import RNPickerSelect from "react-native-picker-select";
 import CustomButton from "../components/CustomButton";
 import * as Notifications from "expo-notifications";
+import { httpsCallable } from "firebase/functions";
+
+const updateUser = httpsCallable(functions, "updateUser");
 
 const options = [
 	{
@@ -54,6 +57,8 @@ const ProfileSetup = ({ navigation }) => {
 	const [connectionDistance, setConnectionDistance] = useState(1);
 	const [user, setUser] = useState(null);
 	const [loading, setLoading] = useState(false);
+	const [isError, setIsError] = useState(false);
+	const [errorMessage, setErrorMessage] = useState("");
 
 	useEffect(() => {
 		const fetchUserData = async () => {
@@ -85,23 +90,32 @@ const ProfileSetup = ({ navigation }) => {
 		requestNotificationPermission();
 	}, []);
 
-	const updateUserData = async () => {
-		try {
-			const userRef = doc(db, "users", auth.currentUser?.uid);
-			await updateDoc(userRef, {
-				"notificationSettings.enabled": isNotificationsEnabled,
-				"notificationSettings.rules.home": connectionDistance,
-			});
-			console.log("User data updated successfully.");
-		} catch (error) {
-			console.error("Error updating user data:", error);
-		}
-	};
-
 	const handleFinishSignUp = async () => {
 		setLoading(true);
-		await updateUserData();
-		navigation.navigate("Home");
+		const userRef = doc(db, "users", auth.currentUser?.uid);
+
+		await updateUser({userId: userRef, data: {
+					"notificationSettings.enabled": isNotificationsEnabled,
+					"notificationSettings.rules.home": connectionDistance,
+				} }).then((result) => {
+					const data = result.data;
+					const success = data.success;
+
+					if (success) {
+						console.log(data.message);
+						navigation.navigate("Home");
+						setLoading(false);
+					} else {
+						setIsError(true);
+						console.log(data.message);
+						setLoading(false);
+					}
+				})
+				.catch((error) => {
+					setIsError(true);
+					console.log(error);
+					setLoading(false);
+				});
 		setLoading(false);
 	};
 

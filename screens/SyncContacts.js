@@ -3,14 +3,18 @@ import React, { useEffect, useState } from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
 import StepIndicator from "../components/StepIndicator";
 import * as Contacts from "expo-contacts";
-import { db, auth } from "../firebaseConfig";
+import { db, auth, functions } from "../firebaseConfig";
 import { setDoc, updateDoc, collection, getDoc, doc } from "firebase/firestore";
 import CustomButton from "../components/CustomButton";
+import { httpsCallable } from "firebase/functions";
 
+const replaceUserContacts = httpsCallable(functions, "replaceUserContacts");
 
 const SyncContacts = ({ navigation }) => {
 	const [loading, setLoading] = useState(false);
 	const [user, setUser] = useState(null);
+	const [isError, setIsError] = useState(false);
+	const [errorMessage, setErrorMessage] = useState("");
 
 	useEffect(() => {
 		const fetchUserData = async () => {
@@ -34,27 +38,31 @@ const SyncContacts = ({ navigation }) => {
 			const { data } = await Contacts.getContactsAsync({});
 
 			if (data.length > 0 && user) {
-				const userRef = doc(db, "users", user.uid); 
-				const contactsCollectionRef = collection(userRef, "contacts"); 
-				console.log("fetched contacts");
+				await replaceUserContacts({ userId: user.uid, contacts: data })
+					.then((result) => {
+						const data = result.data;
+						const success = data.success;
 
-				for (const contact of data) {
-					const contactId = contact.id; 
-
-					if (contactId) {
-						const contactRef = doc(contactsCollectionRef, contactId); 
-						const contactSnap = await getDoc(contactRef);
-
-						if (contactSnap.exists()) {
-							await updateDoc(contactRef, contact);
+						if (success) {
+							console.log(data.message);
+							navigation.navigate("AllowLocation");
+							setLoading(false);
 						} else {
-							await setDoc(contactRef, contact);
+							setIsError(true);
+							console.log(data.message);
+							setLoading(false);
 						}
-					}
-				}
+					})
+					.catch((error) => {
+						setIsError(true);
+						console.log(error);
+						setLoading(false);
+					});
 			}
+		} else {
+			setIsError(true);
+			setErrorMessage("Permission to access contacts was denied");
 		}
-		navigation.navigate("AllowLocation");
 		setLoading(false);
 	};
 
@@ -67,7 +75,9 @@ const SyncContacts = ({ navigation }) => {
 				style={styles.image}
 			/>
 			<Text style={styles.subtitle}>
-				Syncing your contacts allows Stumbl to know who you are connected with. Stumbl will never use thes contacts for anything other than establishing your connections. 
+				Syncing your contacts allows Stumbl to know who you are connected with.
+				Stumbl will never use thes contacts for anything other than establishing
+				your connections.
 			</Text>
 			<CustomButton
 				loading={loading}
@@ -75,6 +85,7 @@ const SyncContacts = ({ navigation }) => {
 				text='Sync Contacts'
 				onPress={syncContacts}
 			/>
+			{isError && <Text style={styles.warningText}>{errorMessage}</Text>}
 		</View>
 	);
 };
@@ -104,13 +115,13 @@ const styles = StyleSheet.create({
 		textAlign: "center",
 		marginBottom: 40,
 		color: "#666",
-		fontFamily: 'regular'
+		fontFamily: "regular",
 	},
 	centeredView: {
 		flex: 1,
 		justifyContent: "center",
 		alignItems: "center",
-		backgroundColor: "rgba(0,0,0,0.4)", 
+		backgroundColor: "rgba(0,0,0,0.4)",
 	},
 	buttonsContainer: {
 		flexDirection: "row",
@@ -121,6 +132,12 @@ const styles = StyleSheet.create({
 		bottom: 40,
 		alignSelf: "center",
 		position: "absolute",
+	},
+	warningText: {
+		color: "#D15859",
+		marginTop: 10,
+		fontSize: 14,
+		textAlign: "center",
 	},
 });
 
