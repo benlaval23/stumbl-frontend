@@ -1,20 +1,15 @@
 // screens/ProfileSetup.js
 import React, { useEffect, useState } from "react";
-import {
-	View,
-	Text,
-	StyleSheet,
-	Image,
-} from "react-native";
+import { View, Text, StyleSheet, Image } from "react-native";
 import StepIndicator from "../components/StepIndicator";
-import { auth, db, functions } from "../firebaseConfig";
-import { updateDoc, getDoc, doc } from "firebase/firestore";
+import { auth, functions } from "../firebaseConfig";
 import RNPickerSelect from "react-native-picker-select";
 import CustomButton from "../components/CustomButton";
 import * as Notifications from "expo-notifications";
 import { httpsCallable } from "firebase/functions";
 
 const updateUser = httpsCallable(functions, "updateUser");
+const getUser = httpsCallable(functions, "getUser");
 
 const options = [
 	{
@@ -63,9 +58,13 @@ const ProfileSetup = ({ navigation }) => {
 	useEffect(() => {
 		const fetchUserData = async () => {
 			try {
-				const userDoc = await getDoc(doc(db, "users", auth.currentUser?.uid));
-				if (userDoc.exists()) {
-					setUser(userDoc.data());
+				const response = await getUser({ userId: auth.currentUser?.uid });
+				const userData = response.data.data;
+
+				if (userData) {
+					setUser(userData);
+				} else {
+					console.log("No user: ", response.message);
 				}
 			} catch (error) {
 				console.error("Error fetching user:", error);
@@ -92,30 +91,33 @@ const ProfileSetup = ({ navigation }) => {
 
 	const handleFinishSignUp = async () => {
 		setLoading(true);
-		const userRef = doc(db, "users", auth.currentUser?.uid);
 
-		await updateUser({userId: userRef, data: {
-					"notificationSettings.enabled": isNotificationsEnabled,
-					"notificationSettings.rules.home": connectionDistance,
-				} }).then((result) => {
-					const data = result.data;
-					const success = data.success;
+		await updateUser({
+			userId: auth.currentUser?.uid,
+			data: {
+				"notificationSettings.enabled": isNotificationsEnabled,
+				"notificationSettings.rules.home": connectionDistance,
+			},
+		})
+			.then((result) => {
+				const data = result.data;
+				const success = data.success;
 
-					if (success) {
-						console.log(data.message);
-						navigation.navigate("Home");
-						setLoading(false);
-					} else {
-						setIsError(true);
-						console.log(data.message);
-						setLoading(false);
-					}
-				})
-				.catch((error) => {
-					setIsError(true);
-					console.log(error);
+				if (success) {
+					console.log(data.message);
+					navigation.navigate("Home");
 					setLoading(false);
-				});
+				} else {
+					setIsError(true);
+					console.log(data.message);
+					setLoading(false);
+				}
+			})
+			.catch((error) => {
+				setIsError(true);
+				console.log(error);
+				setLoading(false);
+			});
 		setLoading(false);
 	};
 
@@ -123,13 +125,15 @@ const ProfileSetup = ({ navigation }) => {
 		<View style={styles.container}>
 			<StepIndicator totalSteps={3} currentStep={3} />
 			<Text style={styles.title}>Notifications Setup</Text>
-			
-		<Image
-			source={require("../assets/images/bellOnAMap.png")}
-			style={styles.image}
-		/>
-			<Text style={styles.subtitle}>Get notified when your connections are within...</Text>
-			<View style={styles.selectContainer} >
+
+			<Image
+				source={require("../assets/images/bellOnAMap.png")}
+				style={styles.image}
+			/>
+			<Text style={styles.subtitle}>
+				Get notified when your connections are within...
+			</Text>
+			<View style={styles.selectContainer}>
 				<RNPickerSelect
 					style={{
 						inputIOS: styles.select,

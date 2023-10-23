@@ -3,12 +3,12 @@ import React, { useEffect, useState } from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
 import StepIndicator from "../components/StepIndicator";
 import * as Contacts from "expo-contacts";
-import { db, auth, functions } from "../firebaseConfig";
-import { setDoc, updateDoc, collection, getDoc, doc } from "firebase/firestore";
+import { auth, functions } from "../firebaseConfig";
 import CustomButton from "../components/CustomButton";
 import { httpsCallable } from "firebase/functions";
 
 const replaceUserContacts = httpsCallable(functions, "replaceUserContacts");
+const getUser = httpsCallable(functions, "getUser");
 
 const SyncContacts = ({ navigation }) => {
 	const [loading, setLoading] = useState(false);
@@ -19,9 +19,13 @@ const SyncContacts = ({ navigation }) => {
 	useEffect(() => {
 		const fetchUserData = async () => {
 			try {
-				const userDoc = await getDoc(doc(db, "users", auth.currentUser?.uid));
-				if (userDoc.exists()) {
-					setUser(userDoc.data());
+				const response = await getUser({ userId: auth.currentUser?.uid });
+				const userData = response.data.data;
+
+				if (userData) {
+					setUser(userData);
+				} else {
+					console.log("No user: ", response.message);
 				}
 			} catch (error) {
 				console.error("Error fetching user:", error);
@@ -29,14 +33,13 @@ const SyncContacts = ({ navigation }) => {
 		};
 
 		fetchUserData();
-	}, [user]);
+	}, []);
 
 	const syncContacts = async () => {
 		setLoading(true);
 		const { status } = await Contacts.requestPermissionsAsync();
 		if (status === "granted") {
 			const { data } = await Contacts.getContactsAsync({});
-
 			if (data.length > 0 && user) {
 				await replaceUserContacts({ userId: user.uid, contacts: data })
 					.then((result) => {

@@ -1,14 +1,11 @@
 // screens/HowItWorks.js
 import React, { useEffect, useState } from "react";
-import {
-	View,
-	Text,
-	StyleSheet,
-	TouchableOpacity,
-} from "react-native";
-import { auth, db } from "../firebaseConfig";
-import { getDoc, doc } from "firebase/firestore";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { auth, functions } from "../firebaseConfig";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { httpsCallable } from "firebase/functions";
+
+const getUser = httpsCallable(functions, "getUser");
 
 const Home = ({ navigation }) => {
 	const [user, setUser] = useState(null);
@@ -26,14 +23,19 @@ const Home = ({ navigation }) => {
 	useEffect(() => {
 		const fetchUserData = async () => {
 			try {
-				const userDoc = await getDoc(doc(db, "users", auth.currentUser?.uid));
-				if (userDoc.exists()) {
-					setUser(userDoc.data());
+				const response = await getUser({ userId: auth.currentUser?.uid });
+				const userData = response.data.data;
+
+				if (userData) {
+					setUser(userData);
+				} else {
+					console.log("No user: ", response.message);
 				}
 			} catch (error) {
 				console.error("Error fetching user:", error);
 			}
 		};
+
 		fetchUserData();
 	}, []);
 
@@ -60,8 +62,7 @@ const Home = ({ navigation }) => {
 			<View style={styles.icon}>
 				<Ionicons name='notifications' size={180} color='#D15859' />
 				<Text style={styles.status}>
-					You'll be notified when contacts are {connectionDistance}km
-					from you.
+					You'll be notified when contacts are {connectionDistance}km from you.
 				</Text>
 			</View>
 		</View>

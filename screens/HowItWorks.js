@@ -10,12 +10,12 @@ const HowItWorks = ({ navigation }) => {
 		<View style={styles.container}>
 			<StepIndicator totalSteps={4} currentStep={1} />
 			<Text style={styles.title}>How it works</Text>
-			<View style={{marginTop: 40}}>
+			<View style={{ marginTop: 40 }}>
 				<View style={styles.feature}>
 					<Text style={styles.subTitle}>Sync your contacts</Text>
 					<Image
 						source={require("../assets/images/phoneContacts.png")}
-						style={{width: 180, height: 180}}
+						style={{ width: 180, height: 180 }}
 					/>
 				</View>
 				<View style={styles.feature}>
@@ -24,7 +24,7 @@ const HowItWorks = ({ navigation }) => {
 					</Text>
 					<Image
 						source={require("../assets/images/locationIconOnMap.png")}
-						style={{width: 180, height: 180}}
+						style={{ width: 180, height: 180 }}
 					/>
 				</View>
 			</View>
@@ -57,8 +57,8 @@ const styles = StyleSheet.create({
 		fontFamily: "bold",
 	},
 	feature: {
-		flexDirection: 'row',
-		width: '100%',
+		flexDirection: "row",
+		width: "100%",
 		justifyContent: "space-between",
 	},
 	subTitle: {

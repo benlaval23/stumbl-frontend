@@ -4,10 +4,8 @@ import { View, Text, StyleSheet, Image } from "react-native";
 import StepIndicator from "../components/StepIndicator";
 import CustomButton from "../components/CustomButton";
 import * as Location from "expo-location";
-import * as LocationTasks from '../hooks/locationTask'
-import { startLocationTracking } from '../hooks/locationTask'
-
-
+import * as LocationTasks from "../hooks/locationTask";
+import { startLocationTracking } from "../hooks/locationTask";
 
 const SyncInstagram = ({ navigation }) => {
 	const [loading, setLoading] = useState(false);
@@ -21,10 +19,19 @@ const SyncInstagram = ({ navigation }) => {
 
 	useEffect(() => {
 		const requestLocationPermission = async () => {
-			let { status } = await Location.requestBackgroundPermissionsAsync();
-			if (status !== 'granted') {
-			  console.error('Permission to access location was denied');
-			  return;
+			let { foregroundStatus } =
+				await Location.requestForegroundPermissionsAsync();
+			if (foregroundStatus === "granted") {
+				console.log("Permission to access foreground location was granted");
+				let { backgroundStatus } =
+					await Location.requestBackgroundPermissionsAsync();
+				if (backgroundStatus === "granted") {
+					console.log("Permission to access background location was granted");
+				} else {
+					console.error("Permission to access background location was denied");
+				}
+			} else {
+				console.error("Permission to access foreground location was denied");
 			}
 		};
 

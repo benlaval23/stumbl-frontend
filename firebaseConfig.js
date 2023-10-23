@@ -21,8 +21,8 @@ const auth = getAuth(app, {
 const db = getFirestore(app);
 const functions = getFunctions(app);
 
-if (__DEV__) {
-	connectFunctionsEmulator(functions, "localhost", 5001);
-} 
+// if (__DEV__) {
+// 	connectFunctionsEmulator(functions, "localhost", 5001);
+// } 
 
 export { app, auth, db, functions };

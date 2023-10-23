@@ -8,8 +8,7 @@ import {
 	StyleSheet,
 	KeyboardAvoidingView,
 } from "react-native";
-import { getDoc, doc, setDoc } from "firebase/firestore";
-import { auth, db, functions } from "../firebaseConfig";
+import { auth, functions } from "../firebaseConfig";
 import CustomButton from "../components/CustomButton";
 import { PhoneAuthProvider, signInWithCredential } from "firebase/auth";
 import { httpsCallable } from "firebase/functions";

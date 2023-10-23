@@ -2,7 +2,8 @@ import * as TaskManager from "expo-task-manager";
 import * as BackgroundFetch from "expo-background-fetch";
 import * as Location from "expo-location";
 import { Platform } from "react-native";
-import { auth, db } from "../firebaseConfig";
+import { auth, db, functions } from "../firebaseConfig";
+import { httpsCallable } from "firebase/functions";
 import {
 	updateDoc,
 	doc,
@@ -19,16 +20,22 @@ import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import Constants from "expo-constants";
 
-const sendNotifications = (notificationsToSend) => {
+const getUser = httpsCallable(functions, "getUser");
+const searchUserByPhoneNumbers = httpsCallable(
+	functions,
+	"searchUserByPhoneNumbers"
+);
+const updateUser = httpsCallable(functions, "updateUser");
 
+const sendNotifications = (notificationsToSend) => {
 	const expoPushToken = registerForPushNotificationsAsync();
 
-    notificationsToSend.forEach((notification) => {
-        const friend = notification?.user?.phoneNumber
-        const distance = String(notification?.distance)
-        const body = `Your friend ${friend} is ${distance}km away`
-        sendPushNotification(expoPushToken, body);
-    })
+	notificationsToSend.forEach((notification) => {
+		const friend = notification?.user?.phoneNumber;
+		const distance = String(notification?.distance);
+		const body = `Your friend ${friend} is ${distance}km away`;
+		sendPushNotification(expoPushToken, body);
+	});
 };
 
 const checkDistance = async (user, matchedUser) => {
@@ -117,28 +124,43 @@ const findUserMatches = async (user) => {
 };
 
 const updateLocationData = async (latestLocation) => {
-	// const user = auth.currentUser?.uid;
+	// const userId = auth.currentUser?.uid;
 	// for testing
-	const user = "zqCYH3a8dQPKItEvASScmQEirQ13";
+	const userId = "zqCYH3a8dQPKItEvASScmQEirQ13";
 	console.log(latestLocation);
 
 	try {
-		const userRef = doc(db, "users", user);
-		await updateDoc(userRef, {
-			lastLocationData: {
-				latitude: latestLocation.coords.latitude,
-				longitude: latestLocation.coords.longitude,
+		// const userRef = doc(db, "users", user);
+
+		await updateUser({
+			userId: userId,
+			data: {
+				"lastLocationData.latitude": latestLocation.coords.latitude,
+				"lastLocationData.longitude": latestLocation.coords.longitude,
 			},
-		});
-		console.log("User location data uploaded successfully.");
-		const matches = await findUserMatches(user);
+		})
+			.then((result) => {
+				console.log(result.data);
+			})
+			.catch((error) => {
+				console.log(error);
+			});
+
+		// await updateDoc(userRef, {
+		// 	lastLocationData: {
+		// 		latitude: latestLocation.coords.latitude,
+		// 		longitude: latestLocation.coords.longitude,
+		// 	},
+		// });
+
+		const matches = await findUserMatches(userId);
 
 		const distances = await Promise.all(
 			matches.map((matchedUser) => checkDistance(user, matchedUser))
 		);
 		console.log(distances);
 		const notificationsToSend = distances.filter(Boolean);
-        sendNotifications(notificationsToSend);
+		sendNotifications(notificationsToSend);
 
 		console.log("notifications to send: ", notificationsToSend);
 	} catch (error) {

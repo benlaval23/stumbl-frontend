@@ -16,7 +16,6 @@ import {
 	FirebaseRecaptchaBanner,
 } from "expo-firebase-recaptcha";
 
-
 const SignUp = ({ navigation }) => {
 	const [phoneNumber, setPhoneNumber] = useState("16505553434");
 	const [countryCode, setCountryCode] = useState("+1");
