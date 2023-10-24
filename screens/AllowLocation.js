@@ -12,31 +12,29 @@ const SyncInstagram = ({ navigation }) => {
 
 	const handleStartLocationTracking = async () => {
 		setLoading(true);
+		requestLocationPermission();
 		startLocationTracking();
 		navigation.navigate("ProfileSetup");
 		setLoading(false);
 	};
 
-	useEffect(() => {
-		const requestLocationPermission = async () => {
-			let { foregroundStatus } =
-				await Location.requestForegroundPermissionsAsync();
-			if (foregroundStatus === "granted") {
-				console.log("Permission to access foreground location was granted");
-				let { backgroundStatus } =
-					await Location.requestBackgroundPermissionsAsync();
-				if (backgroundStatus === "granted") {
-					console.log("Permission to access background location was granted");
-				} else {
-					console.error("Permission to access background location was denied");
-				}
+	const requestLocationPermission = async () => {
+		let { foregroundStatus } =
+			await Location.requestForegroundPermissionsAsync();
+		console.log("foregroundStatus: ", foregroundStatus);
+		if (foregroundStatus === "granted") {
+			console.log("Permission to access foreground location was granted");
+			let { backgroundStatus } =
+				await Location.requestBackgroundPermissionsAsync();
+			if (backgroundStatus === "granted") {
+				console.log("Permission to access background location was granted");
 			} else {
-				console.error("Permission to access foreground location was denied");
+				console.error("Permission to access background location was denied");
 			}
-		};
-
-		requestLocationPermission();
-	}, []);
+		} else {
+			console.error("Permission to access foreground location was denied");
+		}
+	};
 
 	return (
 		<View style={styles.container}>

@@ -7,6 +7,8 @@ import { useLoadFonts } from './hooks/useLoadFonts';
 import * as Location from 'expo-location';
 import * as TaskManager from 'expo-task-manager';
 
+import { enableScreens } from 'react-native-screens';
+enableScreens();
 
 export default function App() {
 	const fontsLoaded = useLoadFonts();
