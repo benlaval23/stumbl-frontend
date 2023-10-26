@@ -105,8 +105,8 @@ exports.updateUser = onCall(async (request) => {
   }
 });
 
-exports.deleteUser = onCall(async (data, context) => {
-  const userId = data.userId;
+exports.deleteUser = onCall(async (request) => {
+  const userId = request.data.userId;
 
   try {
     const userSnapshot = await getFirestore()
@@ -115,16 +115,17 @@ exports.deleteUser = onCall(async (data, context) => {
         .get();
     if (!userSnapshot.exists) {
       return {
-        error: `User with ID: ${userId} does not exist.`,
+        success: false,
+        message: `User with ID: ${userId} does not exist.`,
       };
     } else {
       await getFirestore().collection("users").doc(userId).delete();
 
-      return {result: `User with ID: ${userId} deleted.`};
+      return {success: true, message: `User with ID: ${userId} deleted.`};
     }
   } catch (e) {
     logger.error(e);
-    return {error: e};
+    return {success: false, message: e};
   }
 });
 

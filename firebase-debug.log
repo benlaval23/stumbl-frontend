@@ -1,0 +1,62 @@
+[debug] [2023-10-26T21:11:31.398Z] ----------------------------------------------------------------------
+[debug] [2023-10-26T21:11:31.399Z] Command:       /usr/local/bin/node /usr/local/bin/firebase deploy --only functions
+[debug] [2023-10-26T21:11:31.399Z] CLI Version:   12.7.0
+[debug] [2023-10-26T21:11:31.400Z] Platform:      darwin
+[debug] [2023-10-26T21:11:31.400Z] Node Version:  v18.17.1
+[debug] [2023-10-26T21:11:31.405Z] Time:          Thu Oct 26 2023 22:11:31 GMT+0100 (British Summer Time)
+[debug] [2023-10-26T21:11:31.405Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2023-10-26T21:11:31.443Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2023-10-26T21:11:31.443Z] > authorizing via signed-in user (benlaval23@gmail.com)
+[debug] [2023-10-26T21:11:31.443Z] [iam] checking project re-connect-7920b for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
+[debug] [2023-10-26T21:11:31.444Z] > refreshing access token with scopes: []
+[debug] [2023-10-26T21:11:31.445Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2023-10-26T21:11:31.445Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2023-10-26T21:11:31.625Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2023-10-26T21:11:31.625Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2023-10-26T21:11:31.634Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/re-connect-7920b:testIamPermissions [none]
+[debug] [2023-10-26T21:11:31.634Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/re-connect-7920b:testIamPermissions x-goog-quota-user=projects/re-connect-7920b
+[debug] [2023-10-26T21:11:31.634Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/re-connect-7920b:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2023-10-26T21:11:32.324Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/re-connect-7920b:testIamPermissions 200
+[debug] [2023-10-26T21:11:32.324Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/re-connect-7920b:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2023-10-26T21:11:32.324Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/re-connect-7920b/serviceAccounts/re-connect-7920b@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2023-10-26T21:11:32.324Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/re-connect-7920b/serviceAccounts/re-connect-7920b@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2023-10-26T21:11:32.647Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/re-connect-7920b/serviceAccounts/re-connect-7920b@appspot.gserviceaccount.com:testIamPermissions 404
+[debug] [2023-10-26T21:11:32.647Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/re-connect-7920b/serviceAccounts/re-connect-7920b@appspot.gserviceaccount.com:testIamPermissions {"error":{"code":404,"message":"Unknown service account","status":"NOT_FOUND"}}
+[debug] [2023-10-26T21:11:32.648Z] [functions] service account IAM check errored, deploy may fail: HTTP Error: 404, Unknown service account {"name":"FirebaseError","children":[],"context":{"body":{"error":{"code":404,"message":"Unknown service account","status":"NOT_FOUND"}},"response":{"statusCode":404}},"exit":1,"message":"HTTP Error: 404, Unknown service account","status":404}
+[info] 
+[info] === Deploying to 're-connect-7920b'...
+[info] 
+[info] i  deploying functions 
+[info] Running command: npm --prefix "$RESOURCE_DIR" run lint
+[info] ✔  functions: Finished running predeploy script. 
+[debug] [2023-10-26T21:11:33.456Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/re-connect-7920b [none]
+[debug] [2023-10-26T21:11:33.764Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/re-connect-7920b 200
+[debug] [2023-10-26T21:11:33.765Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/re-connect-7920b {"projectId":"re-connect-7920b","projectNumber":"948733715485","displayName":"stumbl","name":"projects/re-connect-7920b","resources":{"hostingSite":"re-connect-7920b"},"state":"ACTIVE","etag":"1_eafab53c-82a9-46c5-82f7-85e1f70268ea"}
+[info] i  functions: preparing codebase default for deployment 
+[info] i  functions: ensuring required API cloudfunctions.googleapis.com is enabled... 
+[info] i  functions: ensuring required API cloudbuild.googleapis.com is enabled... 
+[info] i  artifactregistry: ensuring required API artifactregistry.googleapis.com is enabled... 
+[debug] [2023-10-26T21:11:33.767Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/re-connect-7920b/services/cloudfunctions.googleapis.com [none]
+[debug] [2023-10-26T21:11:33.767Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/re-connect-7920b/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/re-connect-7920b
+[debug] [2023-10-26T21:11:33.767Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/re-connect-7920b/services/runtimeconfig.googleapis.com [none]
+[debug] [2023-10-26T21:11:33.767Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/re-connect-7920b/services/runtimeconfig.googleapis.com x-goog-quota-user=projects/re-connect-7920b
+[debug] [2023-10-26T21:11:33.768Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/re-connect-7920b/services/cloudbuild.googleapis.com [none]
+[debug] [2023-10-26T21:11:33.768Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/re-connect-7920b/services/cloudbuild.googleapis.com x-goog-quota-user=projects/re-connect-7920b
+[debug] [2023-10-26T21:11:33.768Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/re-connect-7920b/services/artifactregistry.googleapis.com [none]
+[debug] [2023-10-26T21:11:33.768Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/re-connect-7920b/services/artifactregistry.googleapis.com x-goog-quota-user=projects/re-connect-7920b
+[debug] [2023-10-26T21:11:34.653Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/re-connect-7920b/services/runtimeconfig.googleapis.com 200
+[debug] [2023-10-26T21:11:34.654Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/re-connect-7920b/services/runtimeconfig.googleapis.com [omitted]
+[debug] [2023-10-26T21:11:34.674Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/re-connect-7920b/services/artifactregistry.googleapis.com 200
+[debug] [2023-10-26T21:11:34.675Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/re-connect-7920b/services/artifactregistry.googleapis.com [omitted]
+[info] ✔  artifactregistry: required API artifactregistry.googleapis.com is enabled 
+[debug] [2023-10-26T21:11:34.677Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/re-connect-7920b/services/cloudfunctions.googleapis.com 200
+[debug] [2023-10-26T21:11:34.677Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/re-connect-7920b/services/cloudfunctions.googleapis.com [omitted]
+[info] ✔  functions: required API cloudfunctions.googleapis.com is enabled 
+[debug] [2023-10-26T21:11:34.696Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/re-connect-7920b/services/cloudbuild.googleapis.com 200
+[debug] [2023-10-26T21:11:34.697Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/re-connect-7920b/services/cloudbuild.googleapis.com [omitted]
+[info] ✔  functions: required API cloudbuild.googleapis.com is enabled 
+[debug] [2023-10-26T21:11:34.698Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/re-connect-7920b/adminSdkConfig [none]
+[debug] [2023-10-26T21:11:34.962Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/re-connect-7920b/adminSdkConfig 200
+[debug] [2023-10-26T21:11:34.963Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/re-connect-7920b/adminSdkConfig {"projectId":"re-connect-7920b","storageBucket":"re-connect-7920b.appspot.com"}
+[debug] [2023-10-26T21:11:34.963Z] >>> [apiv2][query] GET https://runtimeconfig.googleapis.com/v1beta1/projects/re-connect-7920b/configs [none]
