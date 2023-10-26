@@ -38,6 +38,7 @@ const SyncContacts = ({ navigation }) => {
 	const syncContacts = async () => {
 		setLoading(true);
 		const { status } = await Contacts.requestPermissionsAsync();
+		
 		if (status === "granted") {
 			const { data } = await Contacts.getContactsAsync({});
 			if (data.length > 0 && user) {

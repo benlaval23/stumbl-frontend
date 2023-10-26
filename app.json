@@ -8,13 +8,13 @@
 			[
 				"expo-location",
 				{
-					"locationAlwaysPermission": "Allow Stumbl to use your location."
+					"locationAlwaysAndWhenInUsePermission": "Allow Stumbl to access your locations so that it can notify you when you are near a connection."
 				}
 			],
 			[
 				"expo-contacts",
 				{
-					"contactsPermission": "Allow Stumbl to access your contacts."
+					"contactsPermission": "Allow Stumbl to access your contacts so that it can see who you are connected with."
 				}
 			],
 			[
@@ -26,7 +26,7 @@
 				}
 			]
 		],
-		"icon": "./assets/icon.png",
+		"icon": "./assets/images/appIcon.png",
 		"userInterfaceStyle": "light",
 		"splash": {
 			"image": "./assets/splash.png",
@@ -37,7 +37,7 @@
 		"ios": {
 			"supportsTablet": true,
 			"infoPlist": {
-				"NSLocationAlwaysUsageDescription": "Allow Stumbl to access your locations so that it can notify you when you are near a friend.",
+				"NSLocationAlwaysUsageDescription": "Allow Stumbl to access your locations so that it can notify you when you are near a connection.",
 				"UIBackgroundModes": ["location", "fetch"],
 				"NSContactsUsageDescription": "Allow Stumbl to access your contacts so that it can see who you are connected with."
 			},

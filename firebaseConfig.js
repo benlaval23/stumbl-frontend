@@ -23,6 +23,7 @@ const functions = getFunctions(app);
 
 // if (__DEV__) {
 // 	connectFunctionsEmulator(functions, "localhost", 5001);
+// 	console.log("functions emulator connected");
 // } 
 
 export { app, auth, db, functions };

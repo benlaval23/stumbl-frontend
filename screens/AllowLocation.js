@@ -12,21 +12,19 @@ const SyncInstagram = ({ navigation }) => {
 
 	const handleStartLocationTracking = async () => {
 		setLoading(true);
-		requestLocationPermission();
-		startLocationTracking();
+		await requestLocationPermission();
+		await startLocationTracking();
 		navigation.navigate("ProfileSetup");
 		setLoading(false);
 	};
 
 	const requestLocationPermission = async () => {
-		let { foregroundStatus } =
+		let { status } =
 			await Location.requestForegroundPermissionsAsync();
-		console.log("foregroundStatus: ", foregroundStatus);
-		if (foregroundStatus === "granted") {
+		if (status === "granted") {
 			console.log("Permission to access foreground location was granted");
-			let { backgroundStatus } =
-				await Location.requestBackgroundPermissionsAsync();
-			if (backgroundStatus === "granted") {
+			let { status } = await Location.requestBackgroundPermissionsAsync();
+			if (status === "granted") {
 				console.log("Permission to access background location was granted");
 			} else {
 				console.error("Permission to access background location was denied");

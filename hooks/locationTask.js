@@ -2,17 +2,8 @@ import * as TaskManager from "expo-task-manager";
 import * as BackgroundFetch from "expo-background-fetch";
 import * as Location from "expo-location";
 import { Platform } from "react-native";
-import { auth, db, functions } from "../firebaseConfig";
+import { auth, functions } from "../firebaseConfig";
 import { httpsCallable } from "firebase/functions";
-import {
-	updateDoc,
-	doc,
-	collection,
-	getDocs,
-	getDoc,
-	query,
-	where,
-} from "firebase/firestore";
 import { haversineDistance } from "./distance";
 const LOCATION_TRACKING = "location-tracking";
 const BACKGROUND_FETCH_TASK = "background-fetch-task";
@@ -21,6 +12,7 @@ import * as Device from "expo-device";
 import Constants from "expo-constants";
 
 const getUser = httpsCallable(functions, "getUser");
+const getUserContacts = httpsCallable(functions, "getUserContacts");
 const searchUserByPhoneNumbers = httpsCallable(
 	functions,
 	"searchUserByPhoneNumbers"
@@ -38,96 +30,61 @@ const sendNotifications = (notificationsToSend) => {
 	});
 };
 
-const checkDistance = async (user, matchedUser) => {
-	try {
-		const userDoc = await getDoc(doc(db, "users", user));
-		if (userDoc.exists()) {
-			const currentUser = userDoc.data();
+const checkDistance = async (currentUser, matchedUser) => {
+	if (currentUser && matchedUser) {
 
-			const currentUserLocation = currentUser?.lastLocationData;
-			const lat1 = currentUserLocation.latitude;
-			const lon1 = currentUserLocation.longitude;
+		const currentUserLocation = currentUser?.lastLocationData;
+		const lat1 = currentUserLocation.latitude;
+		const lon1 = currentUserLocation.longitude;
 
-			const matchedUserLocations = matchedUser?.lastLocationData;
-			const lat2 = matchedUserLocations?.latitude;
-			const lon2 = matchedUserLocations?.longitude;
+		const matchedUserLocations = matchedUser?.lastLocationData;
+		const lat2 = matchedUserLocations?.latitude;
+		const lon2 = matchedUserLocations?.longitude;
 
-			const distance = haversineDistance(lat1, lon1, lat2, lon2);
+		const distance = haversineDistance(lat1, lon1, lat2, lon2);
 
-			const notificationSettings =
-				currentUser?.notificationSettings?.rules?.home;
+		const notificationSettings =
+			currentUser?.notificationSettings?.rules?.home;
 
-			if (distance <= notificationSettings) {
-				const userDistance = {
-					user: matchedUser,
-					distance: distance,
-				};
-				console.log("checkDistance()", userDistance);
-				return userDistance;
-			} else {
-				return null;
-			}
+		if (distance <= notificationSettings) {
+			const userDistance = {
+				user: matchedUser,
+				distance: distance,
+			};
+			return userDistance;
 		} else {
 			return null;
 		}
-	} catch (e) {
-		console.log(e);
-		return null;
 	}
 };
 
 const findUserMatches = async (user) => {
-	let userMatches = [];
 
 	try {
-		const contactsRef = collection(doc(db, "users", user), "contacts");
-		const contactsSnapshot = await getDocs(contactsRef);
-		const contactsDocs = contactsSnapshot.docs;
-
+		const userContacts = await getUserContacts({ userId: user })
+		const contacts = userContacts.data.data;
 		// 1. Gather all phone numbers
 		let allPhoneNumbers = [];
-		for (let contact of contactsDocs) {
-			let phoneNumbers = contact.data()?.phoneNumbers;
+		for (let contact of contacts) {
+			let phoneNumbers = contact.phoneNumbers;
 			for (let phoneNumber of phoneNumbers) {
 				allPhoneNumbers.push(phoneNumber.digits);
 			}
 		}
-		console.log(allPhoneNumbers);
 
-		// 2. Batched queries
-		for (let i = 0; i < allPhoneNumbers.length; i += 10) {
-			const batch = allPhoneNumbers.slice(i, i + 10);
-			const usersRef = collection(db, "users");
+		const userMatchesResponse = await searchUserByPhoneNumbers({phoneNumbers: allPhoneNumbers});
+		const userMatches = userMatchesResponse.data.data;
+		return userMatches;
 
-			try {
-				const userQuery = query(usersRef, where("phoneNumber", "in", batch));
-				const snapshot = await getDocs(userQuery);
-				// 3. Iterate through results
-
-				snapshot.docs.forEach((doc) => {
-					const docData = doc.data();
-					console.log(docData);
-
-					const matchedUser = { id: doc.id, ...docData };
-					userMatches.push(matchedUser);
-				});
-			} catch (e) {
-				console.log("error with findin phone nmber in batch", e);
-			}
-		}
 	} catch (error) {
 		console.error("Error fetching user:", error);
 	}
-
-	console.log("findUserMatches()", userMatches);
-	return userMatches;
 };
 
 const updateLocationData = async (latestLocation) => {
-	// const userId = auth.currentUser?.uid;
+	const userIdA = auth.currentUser?.uid;
 	// for testing
 	const userId = "zqCYH3a8dQPKItEvASScmQEirQ13";
-	console.log(latestLocation);
 
 	try {
 		// const userRef = doc(db, "users", user);
@@ -140,29 +97,23 @@ const updateLocationData = async (latestLocation) => {
 			},
 		})
 			.then((result) => {
-				console.log(result.data);
+				console.log(result.data.message);
 			})
 			.catch((error) => {
 				console.log(error);
 			});
 
-		// await updateDoc(userRef, {
-		// 	lastLocationData: {
-		// 		latitude: latestLocation.coords.latitude,
-		// 		longitude: latestLocation.coords.longitude,
-		// 	},
-		// });
-
 		const matches = await findUserMatches(userId);
 
+		const currentUserResponse = await getUser({ userId: userId });
+		const currentUser = currentUserResponse.data.data;
+
 		const distances = await Promise.all(
-			matches.map((matchedUser) => checkDistance(user, matchedUser))
+			matches.map((matchedUser) => checkDistance(currentUser, matchedUser))
 		);
-		console.log(distances);
 		const notificationsToSend = distances.filter(Boolean);
 		sendNotifications(notificationsToSend);
 
-		console.log("notifications to send: ", notificationsToSend);
 	} catch (error) {
 		console.error("Error updating user data:", error);
 	}
@@ -171,7 +122,7 @@ const updateLocationData = async (latestLocation) => {
 export const startLocationTracking = async () => {
 	await Location.startLocationUpdatesAsync(LOCATION_TRACKING, {
 		accuracy: Location.Accuracy.Balanced,
-		timeInterval: 360000,
+		timeInterval: 120000,
 		distanceInterval: 0,
 	});
 
@@ -206,6 +157,7 @@ async function fetchData() {
 }
 
 TaskManager.defineTask(LOCATION_TRACKING, async ({ data, error }) => {
+	console.log("Running LOCATION_TRACKING task...");
 	if (error) {
 		console.log("LOCATION_TRACKING task ERROR:", error);
 		return;
@@ -218,6 +170,7 @@ TaskManager.defineTask(LOCATION_TRACKING, async ({ data, error }) => {
 });
 
 TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
+	console.log("Running BACKGROUND_FETCH task...");
 	const receivedNewData = await fetchData(); // you can call your location updates or other data fetching logic here
 	return receivedNewData
 		? BackgroundFetch.Result.NewData

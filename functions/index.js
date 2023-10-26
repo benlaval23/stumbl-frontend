@@ -209,3 +209,40 @@ exports.replaceUserContacts = onCall(async (request) => {
     return {success: false, message: e};
   }
 });
+
+exports.getUserContacts = onCall(async (request) => {
+  const userId = request.data.userId;
+
+  if (!userId) {
+    return {
+      success: false,
+      message: "User ID must be provided in the query string.",
+    };
+  }
+
+  try {
+    const userDoc = await getFirestore().collection("users").doc(userId).get();
+
+    if (!userDoc.exists) {
+      return {
+        success: false,
+        message: `User with ID: ${userId} does not exist.`,
+      };
+    }
+
+    const userContactsCollection = userDoc.ref.collection("contacts");
+
+    const snapshot = await userContactsCollection.get();
+
+    const contacts = snapshot.docs.map((doc) => doc.data());
+
+    return {
+      success: true,
+      message: `Contacts for User with ID: ${userId} retrieved.`,
+      data: contacts,
+    };
+  } catch (e) {
+    logger.error(e);
+    return {success: false, message: e};
+  }
+});
