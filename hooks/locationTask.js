@@ -1,15 +1,16 @@
 import * as TaskManager from "expo-task-manager";
 import * as BackgroundFetch from "expo-background-fetch";
 import * as Location from "expo-location";
-import { Platform } from "react-native";
 import { auth, functions } from "../firebaseConfig";
 import { httpsCallable } from "firebase/functions";
-import { haversineDistance } from "./distance";
+import { haversineDistance, normalizePhoneNumber } from "./utils";
 const LOCATION_TRACKING = "location-tracking";
 const BACKGROUND_FETCH_TASK = "background-fetch-task";
-import * as Notifications from "expo-notifications";
-import * as Device from "expo-device";
-import Constants from "expo-constants";
+import * as NotificationTasks from "./notifications";
+import {
+	sendPushNotification,
+	registerForPushNotificationsAsync,
+} from "./notifications";
 
 const getUser = httpsCallable(functions, "getUser");
 const getUserContacts = httpsCallable(functions, "getUserContacts");
@@ -19,20 +20,37 @@ const searchUserByPhoneNumbers = httpsCallable(
 );
 const updateUser = httpsCallable(functions, "updateUser");
 
-const sendNotifications = (notificationsToSend) => {
-	const expoPushToken = registerForPushNotificationsAsync();
+const sendNotifications = async (notificationsToSend) => {
+    try {
+        const token = await registerForPushNotificationsAsync();
 
-	notificationsToSend.forEach((notification) => {
-		const friend = notification?.user?.phoneNumber;
-		const distance = String(notification?.distance);
-		const body = `Your friend ${friend} is ${distance}km away`;
-		sendPushNotification(expoPushToken, body);
-	});
+        for (let notification of notificationsToSend) {
+            const distance = notification.distance;
+			let text;
+
+			if (distance < 1) {
+				text = `${notification?.user?.name} is less than 1km away from you!`;
+			} else {
+				text = `${notification?.user?.name} is ${Math.round(distance)}km away from you!`;
+			}
+
+            const message = {
+                to: token,
+                sound: "default",
+                title: "Stumbl",
+                body: text,
+                data: { someData: "goes here" },
+            };
+
+            sendPushNotification(message);
+        }
+    } catch (error) {
+        console.error("Failed to send notifications:", error);
+    }
 };
 
 const checkDistance = async (currentUser, matchedUser) => {
 	if (currentUser && matchedUser) {
-
 		const currentUserLocation = currentUser?.lastLocationData;
 		const lat1 = currentUserLocation.latitude;
 		const lon1 = currentUserLocation.longitude;
@@ -42,9 +60,7 @@ const checkDistance = async (currentUser, matchedUser) => {
 		const lon2 = matchedUserLocations?.longitude;
 
 		const distance = haversineDistance(lat1, lon1, lat2, lon2);
-
-		const notificationSettings =
-			currentUser?.notificationSettings?.rules?.home;
+		const notificationSettings = currentUser?.notificationSettings?.rules?.home;
 
 		if (distance <= notificationSettings) {
 			const userDistance = {
@@ -59,35 +75,68 @@ const checkDistance = async (currentUser, matchedUser) => {
 };
 
 const findUserMatches = async (user) => {
-
 	try {
-		const userContacts = await getUserContacts({ userId: user })
+		
+		const userContacts = await getUserContacts({ userId: user });
+
 		const contacts = userContacts.data.data;
 		// 1. Gather all phone numbers
 		let allPhoneNumbers = [];
+
 		for (let contact of contacts) {
-			let phoneNumbers = contact.phoneNumbers;
+			const name = contact?.name;
+			let phoneNumbers = contact?.phoneNumbers;
+			if (!Array.isArray(phoneNumbers)) {
+				console.warn("phoneNumbers is not an array for a contact:", contact);
+				continue; // Skip to the next contact
+			}
+
 			for (let phoneNumber of phoneNumbers) {
-				allPhoneNumbers.push(phoneNumber.digits);
+
+				let digits = phoneNumber.digits.toString(); 
+
+				if (digits.startsWith("00")) {
+					digits = digits.replace(/^00/, "+");
+				} else if (digits.startsWith("0")) {
+					digits = digits.replace(/^0/, "+44");
+				} else if (digits.startsWith("44")) {
+					digits = digits.replace(/^44/, "+44");
+				}
+
+				const normalizedPhoneNumber = normalizePhoneNumber(digits);
+				if (normalizedPhoneNumber) { 
+					allPhoneNumbers.push({name: name, normalizePhoneNumber: normalizedPhoneNumber});
+				} else {
+					console.warn("Unable to normalize phone number:", digits);
+				}
 			}
 		}
 
-		const userMatchesResponse = await searchUserByPhoneNumbers({phoneNumbers: allPhoneNumbers});
-		const userMatches = userMatchesResponse.data.data;
-		return userMatches;
+		const justPhoneNumbers = allPhoneNumbers.map(entry => entry.normalizePhoneNumber)
 
+		const userMatchesResponse = await searchUserByPhoneNumbers({
+			phoneNumbers: justPhoneNumbers,
+		});
+
+		const userMatches = userMatchesResponse.data.data;
+
+		for (let user of userMatches) {
+			const phoneNumber = user?.phoneNumber?.normalizedNumber;
+			const name = allPhoneNumbers.find(entry => entry.normalizePhoneNumber === phoneNumber)?.name;
+			user.name = name;
+		}
+
+		return userMatches;
 	} catch (error) {
 		console.error("Error fetching user:", error);
 	}
 };
 
 const updateLocationData = async (latestLocation) => {
-	const userIdA = auth.currentUser?.uid;
-	// for testing
-	const userId = "zqCYH3a8dQPKItEvASScmQEirQ13";
+	const userId = auth.currentUser?.uid;
+	console.log("userId: ", userId);
 
 	try {
-		// const userRef = doc(db, "users", user);
 
 		await updateUser({
 			userId: userId,
@@ -112,8 +161,8 @@ const updateLocationData = async (latestLocation) => {
 			matches.map((matchedUser) => checkDistance(currentUser, matchedUser))
 		);
 		const notificationsToSend = distances.filter(Boolean);
+	
 		sendNotifications(notificationsToSend);
-
 	} catch (error) {
 		console.error("Error updating user data:", error);
 	}
@@ -121,8 +170,8 @@ const updateLocationData = async (latestLocation) => {
 
 export const startLocationTracking = async () => {
 	await Location.startLocationUpdatesAsync(LOCATION_TRACKING, {
-		accuracy: Location.Accuracy.Balanced,
-		timeInterval: 120000,
+		accuracy: Location.Accuracy.Low,
+		timeInterval: 3600000,
 		distanceInterval: 0,
 	});
 
@@ -157,6 +206,13 @@ async function fetchData() {
 }
 
 TaskManager.defineTask(LOCATION_TRACKING, async ({ data, error }) => {
+
+	const userId = auth.currentUser?.uid;
+
+	if (!userId) {
+		console.warn("No user ID found, aborting location update.");
+		return;
+	}
 	console.log("Running LOCATION_TRACKING task...");
 	if (error) {
 		console.log("LOCATION_TRACKING task ERROR:", error);
@@ -170,74 +226,16 @@ TaskManager.defineTask(LOCATION_TRACKING, async ({ data, error }) => {
 });
 
 TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
+	const userId = auth.currentUser?.uid;
+
+	if (!userId) {
+		console.warn("No user ID found, aborting location update.");
+		return;
+	}
+
 	console.log("Running BACKGROUND_FETCH task...");
 	const receivedNewData = await fetchData(); // you can call your location updates or other data fetching logic here
 	return receivedNewData
 		? BackgroundFetch.Result.NewData
 		: BackgroundFetch.Result.NoData;
 });
-
-// notifications
-Notifications.setNotificationHandler({
-	handleNotification: async () => ({
-		shouldShowAlert: true,
-		shouldPlaySound: false,
-		shouldSetBadge: false,
-	}),
-});
-
-// Can use this function below or use Expo's Push Notification Tool from: https://expo.dev/notifications
-async function sendPushNotification(expoPushToken, body) {
-	const message = {
-		to: expoPushToken,
-		sound: "default",
-		title: "Friends nearby!",
-		body: body,
-		data: { someData: "goes here" },
-	};
-
-	await fetch("https://exp.host/--/api/v2/push/send", {
-		method: "POST",
-		headers: {
-			Accept: "application/json",
-			"Accept-encoding": "gzip, deflate",
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify(message),
-	});
-}
-
-async function registerForPushNotificationsAsync() {
-	let token;
-
-	if (Platform.OS === "android") {
-		Notifications.setNotificationChannelAsync("default", {
-			name: "default",
-			importance: Notifications.AndroidImportance.MAX,
-			vibrationPattern: [0, 250, 250, 250],
-			lightColor: "#FF231F7C",
-		});
-	}
-
-	if (Device.isDevice) {
-		const { status: existingStatus } =
-			await Notifications.getPermissionsAsync();
-		let finalStatus = existingStatus;
-		if (existingStatus !== "granted") {
-			const { status } = await Notifications.requestPermissionsAsync();
-			finalStatus = status;
-		}
-		if (finalStatus !== "granted") {
-			alert("Failed to get push token for push notification!");
-			return;
-		}
-		token = await Notifications.getExpoPushTokenAsync({
-			projectId: Constants.expoConfig.extra.eas.projectId,
-		});
-		console.log(token);
-	} else {
-		alert("Must use physical device for Push Notifications");
-	}
-
-	return token;
-}

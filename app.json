@@ -6,6 +6,18 @@
 		"orientation": "portrait",
 		"plugins": [
 			[
+				"expo-notifications",
+				{
+					"icon": "./assets/images/appIcon.png",
+					"color": "#ffffff",
+					"androidMode": "default",
+					"androidCollapsedTitle": "Stumbl",
+					"androidNotificationChannelName": "Stumbl",
+					"androidAllowWhileIdle": true,
+					"androidNotificationTimeout": 10000
+				}
+			],
+			[
 				"expo-location",
 				{
 					"locationAlwaysAndWhenInUsePermission": "Allow Stumbl to access your locations so that it can notify you when you are near a connection."

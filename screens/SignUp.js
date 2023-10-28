@@ -15,10 +15,12 @@ import {
 	FirebaseRecaptchaVerifierModal,
 	FirebaseRecaptchaBanner,
 } from "expo-firebase-recaptcha";
+import { normalizePhoneNumber } from "../hooks/utils";
+
 
 const SignUp = ({ navigation }) => {
-	const [phoneNumber, setPhoneNumber] = useState("16505553434");
-	const [countryCode, setCountryCode] = useState("+1");
+	const [phoneNumber, setPhoneNumber] = useState("");
+	const [countryCode, setCountryCode] = useState("+44");
 	const [isInvalid, setIsInvalid] = useState(false);
 	const [errorMessage, setErrorMessage] = useState("");
 	const [loading, setLoading] = useState(false);
@@ -65,8 +67,10 @@ const SignUp = ({ navigation }) => {
 			);
 			setVerificationId(verificationId);
 
-			console.log("sent code to " + fullPhoneNumber);
-			navigation.navigate("Verification", [fullPhoneNumber, verificationId]);
+			const normalizedNumber = normalizePhoneNumber(fullPhoneNumber);
+
+			console.log("Sent code to normalised number" + normalizedNumber);
+			navigation.navigate("Verification", [normalizedNumber, sanitizedNumber, countryCode, verificationId]);
 		} catch (err) {
 			console.log(err);
 		}

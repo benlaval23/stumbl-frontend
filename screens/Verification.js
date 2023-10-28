@@ -17,8 +17,10 @@ const addUser = httpsCallable(functions, "addUser");
 
 const Verification = ({ navigation, route }) => {
 	const [verificationCode, setVerificationCode] = useState("");
-	const phoneNumber = route.params[0];
-	const verificationId = route.params[1];
+	const normalizedNumber = route.params[0];
+	const number = route.params[1];
+	const countryCode = route.params[2];
+	const verificationId = route.params[3];
 	const [loading, setLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState("");
@@ -36,8 +38,11 @@ const Verification = ({ navigation, route }) => {
 
 			await addUser({
 				uid: user.uid,
-				name: "",
-				phoneNumber: user.phoneNumber,
+				phoneNumber: {
+					normalizedNumber: normalizedNumber,
+					countryCode: countryCode,
+					number: number,
+				},
 				enabled: true,
 				createdAt: new Date(),
 				updatedAt: new Date(),
@@ -93,7 +98,7 @@ const Verification = ({ navigation, route }) => {
 				style={styles.image}
 			/>
 			<Text style={styles.subtitle}>
-				We've sent a 6-digit code to you {phoneNumber}. Please enter it below.
+				We've sent a 6-digit code to you {number}. Please enter it below.
 			</Text>
 			<Text style={styles.info}>Not received code? Resend in 40 seconds.</Text>
 			<View style={styles.codeContainer}>

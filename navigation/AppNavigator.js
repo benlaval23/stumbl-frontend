@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import SignUp from "../screens/SignUp";
 import Verification from "../screens/Verification";
-import HowItWorks from "../screens/HowItWorks";
 import SyncContacts from "../screens/SyncContacts";
 import AllowLocation from "../screens/AllowLocation";
 import ProfileSetup from "../screens/ProfileSetup";

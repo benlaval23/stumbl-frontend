@@ -1,15 +1,20 @@
 // screens/HowItWorks.js
-import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useEffect, useState, useRef } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, Button } from "react-native";
 import { auth, functions } from "../firebaseConfig";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { httpsCallable } from "firebase/functions";
+
 
 const getUser = httpsCallable(functions, "getUser");
 
 const Home = ({ navigation }) => {
 	const [user, setUser] = useState(null);
 	const [connectionDistance, setConnectionDistance] = useState();
+	const [expoPushToken, setExpoPushToken] = useState("");
+	const [notification, setNotification] = useState(false);
+	const notificationListener = useRef();
+	const responseListener = useRef();
 
 	const handleSignOut = () => {
 		auth
@@ -37,6 +42,7 @@ const Home = ({ navigation }) => {
 		};
 
 		fetchUserData();
+
 	}, []);
 
 	useEffect(() => {

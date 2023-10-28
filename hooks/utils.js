@@ -1,3 +1,6 @@
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
+
+
 export const haversineDistance = (lat1, lon1, lat2, lon2) => {
     const R = 6371; // Radius of the Earth in kilometers
     const dLat = degreesToRadians(lat2 - lat1);
@@ -17,4 +20,13 @@ export const haversineDistance = (lat1, lon1, lat2, lon2) => {
 
 function degreesToRadians(degrees) {
     return degrees * (Math.PI / 180);
+}
+
+
+export function normalizePhoneNumber(number) {
+    const phoneNumber = parsePhoneNumberFromString(number);
+    if (!phoneNumber) {
+        return null; // Or handle invalid numbers as you see fit
+    }
+    return phoneNumber.formatInternational(); // Or format it as E.164 or whatever you prefer
 }

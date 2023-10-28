@@ -7,6 +7,7 @@ import RNPickerSelect from "react-native-picker-select";
 import CustomButton from "../components/CustomButton";
 import * as Notifications from "expo-notifications";
 import { httpsCallable } from "firebase/functions";
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
 const updateUser = httpsCallable(functions, "updateUser");
 const getUser = httpsCallable(functions, "getUser");
@@ -71,27 +72,26 @@ const ProfileSetup = ({ navigation }) => {
 			}
 		};
 
-		const requestNotificationPermission = async () => {
-			try {
-				const { status } = await Notifications.requestPermissionsAsync();
-				if (status === "granted") {
-					console.log("Notification permissions granted!");
-					setIsNotificationsEnabled(true);
-				} else {
-					console.log("Notification permissions denied!");
-				}
-			} catch (error) {
-				console.error("Failed to request notification permission:", error);
-			}
-		};
-
 		fetchUserData();
-		requestNotificationPermission();
 	}, []);
+
+	const requestNotificationPermission = async () => {
+		try {
+			const { status } = await Notifications.requestPermissionsAsync();
+			if (status === "granted") {
+				console.log("Notification permissions granted!");
+				setIsNotificationsEnabled(true);
+			} else {
+				console.log("Notification permissions denied!");
+			}
+		} catch (error) {
+			console.error("Failed to request notification permission:", error);
+		}
+	};
 
 	const handleFinishSignUp = async () => {
 		setLoading(true);
-
+		await requestNotificationPermission();
 		await updateUser({
 			userId: auth.currentUser?.uid,
 			data: {

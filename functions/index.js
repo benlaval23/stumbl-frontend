@@ -58,21 +58,33 @@ exports.searchUserByPhoneNumbers = onCall(async (request) => {
   const phoneNumbers = request.data.phoneNumbers;
   try {
     const usersCollection = getFirestore().collection("users");
-    const querySnapshot = await usersCollection
-        .where("phoneNumber", "in", phoneNumbers)
-        .get();
-    const userData = querySnapshot.docs.map((doc) => doc.data());
 
-    if (userData.length === 0) {
+    const chunks = [];
+    for (let i = 0; i < phoneNumbers.length; i += 10) {
+      chunks.push(phoneNumbers.slice(i, i + 10));
+    }
+
+    const allResults = [];
+
+    for (const chunk of chunks) {
+      const querySnapshot = await usersCollection
+          .where("phoneNumber.normalizedNumber", "in", chunk)
+          .get();
+
+      const userData = querySnapshot.docs.map((doc) => doc.data());
+      allResults.push(...userData);
+    }
+
+    if (allResults.length === 0) {
       return {
         success: false,
-        message: `No users found with phone numbers: ${phoneNumbers}`,
+        message: `No users found.`,
       };
     } else {
       return {
         success: true,
-        data: userData,
-        message: `Users found with phone numbers: ${phoneNumbers}`,
+        data: allResults,
+        message: `${allResults.length} users found`,
       };
     }
   } catch (e) {
@@ -236,6 +248,57 @@ exports.getUserContacts = onCall(async (request) => {
     const snapshot = await userContactsCollection.get();
 
     const contacts = snapshot.docs.map((doc) => doc.data());
+
+    return {
+      success: true,
+      message: `Contacts for User with ID: ${userId} retrieved.`,
+      data: contacts,
+    };
+  } catch (e) {
+    logger.error(e);
+    return {success: false, message: e};
+  }
+});
+
+exports.getUserContactsByPhoneNumber = onCall(async (request) => {
+  const userId = request.data.userId;
+  const phoneNumberDigits = request.data.phoneNumber;
+
+  if (!userId) {
+    return {
+      success: false,
+      message: "User ID must be provided in the query string.",
+    };
+  }
+
+  if (!phoneNumberDigits) {
+    return {
+      success: false,
+      message: "Phone number must be provided in the query string.",
+    };
+  }
+
+  try {
+    const userDoc = await getFirestore().collection("users").doc(userId).get();
+
+    if (!userDoc.exists) {
+      return {
+        success: false,
+        message: `User with ID: ${userId} does not exist.`,
+      };
+    }
+
+    const userContactsCollection = userDoc.ref.collection("contacts");
+
+    const allContactsSnapshot = await userContactsCollection.get();
+
+    const contacts = allContactsSnapshot.docs
+        .map((doc) => doc.data())
+        .filter((contact) =>
+          contact.phoneNumbers.some((phone) => {
+            phone.digits === phoneNumberDigits;
+          }),
+        );
 
     return {
       success: true,
