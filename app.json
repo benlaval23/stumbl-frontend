@@ -50,7 +50,7 @@
 			"supportsTablet": true,
 			"infoPlist": {
 				"NSLocationAlwaysUsageDescription": "Allow Stumbl to access your locations so that it can notify you when you are near a connection.",
-				"UIBackgroundModes": ["location", "fetch"],
+				"UIBackgroundModes": ["location", "fetch", "remote-notification"],
 				"NSContactsUsageDescription": "Allow Stumbl to access your contacts so that it can see who you are connected with."
 			},
 			"bundleIdentifier": "com.stumbl.app"
