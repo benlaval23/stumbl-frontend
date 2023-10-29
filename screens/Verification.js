@@ -98,7 +98,7 @@ const Verification = ({ navigation, route }) => {
 				style={styles.image}
 			/>
 			<Text style={styles.subtitle}>
-				We've sent a 6-digit code to you {number}. Please enter it below.
+				We've sent a 6-digit code to you {normalizedNumber}. Please enter it below.
 			</Text>
 			<Text style={styles.info}>Not received code? Resend in 40 seconds.</Text>
 			<View style={styles.codeContainer}>
