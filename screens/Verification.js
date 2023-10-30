@@ -21,6 +21,7 @@ const Verification = ({ navigation, route }) => {
 	const number = route.params[1];
 	const countryCode = route.params[2];
 	const verificationId = route.params[3];
+	const confirm = route.params[4];
 	const [loading, setLoading] = useState(false);
 	const [isError, setIsError] = useState(false);
 	const [errorMessage, setErrorMessage] = useState("");
@@ -29,12 +30,18 @@ const Verification = ({ navigation, route }) => {
 		setLoading(true);
 
 		try {
-			const credential = PhoneAuthProvider.credential(
-				verificationId,
-				verificationCode
-			);
-			const userCredential = await signInWithCredential(auth, credential);
-			const user = userCredential.user;
+			// const credential = PhoneAuthProvider.credential(
+			// 	verificationId,
+			// 	verificationCode
+			// );
+			// const userCredential = await signInWithCredential(auth, credential);
+			// const user = userCredential.user;
+
+			try {
+				await confirm.confirm(verificationCode);
+			} catch (error) {
+				console.log("Invalid code.");
+			}
 
 			await addUser({
 				uid: user.uid,
@@ -98,7 +105,8 @@ const Verification = ({ navigation, route }) => {
 				style={styles.image}
 			/>
 			<Text style={styles.subtitle}>
-				We've sent a 6-digit code to you {normalizedNumber}. Please enter it below.
+				We've sent a 6-digit code to you {normalizedNumber}. Please enter it
+				below.
 			</Text>
 			<Text style={styles.info}>Not received code? Resend in 40 seconds.</Text>
 			<View style={styles.codeContainer}>

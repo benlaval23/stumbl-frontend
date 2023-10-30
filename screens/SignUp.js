@@ -7,16 +7,16 @@ import {
 	Image,
 	KeyboardAvoidingView,
 } from "react-native";
-import { auth, app } from "../firebaseConfig";
+import { app } from "../firebaseConfig";
 import CustomButton from "../components/CustomButton";
 import CountryCodeInput from "../components/CountryCodeInput";
 import { PhoneAuthProvider } from "firebase/auth";
-import {
-	FirebaseRecaptchaVerifierModal,
-	FirebaseRecaptchaBanner,
-} from "expo-firebase-recaptcha";
+// import {
+// 	FirebaseRecaptchaVerifierModal,
+// 	FirebaseRecaptchaBanner,
+// } from "expo-firebase-recaptcha";
 import { normalizePhoneNumber } from "../hooks/utils";
-
+import auth from "@react-native-firebase/auth";
 
 const SignUp = ({ navigation }) => {
 	const [phoneNumber, setPhoneNumber] = useState("");
@@ -25,6 +25,7 @@ const SignUp = ({ navigation }) => {
 	const [errorMessage, setErrorMessage] = useState("");
 	const [loading, setLoading] = useState(false);
 
+	const [confirm, setConfirm] = useState(null);
 	const recaptchaVerifier = useRef(null);
 	const [verificationId, setVerificationId] = useState();
 
@@ -60,17 +61,25 @@ const SignUp = ({ navigation }) => {
 		const fullPhoneNumber = countryCode + sanitizedNumber;
 
 		try {
-			const phoneProvider = new PhoneAuthProvider(auth);
-			const verificationId = await phoneProvider.verifyPhoneNumber(
-				fullPhoneNumber,
-				recaptchaVerifier.current
-			);
-			setVerificationId(verificationId);
+			const confirmation = await auth().signInWithPhoneNumber(phoneNumber);
+			confirmation
+			// const phoneProvider = new PhoneAuthProvider(auth);
+			// const verificationId = await phoneProvider.verifyPhoneNumber(
+			// 	fullPhoneNumber,
+			// 	recaptchaVerifier.current
+			// );
+			// setVerificationId(verificationId);
 
 			const normalizedNumber = normalizePhoneNumber(fullPhoneNumber);
 
-			console.log("Sent code to normalised number" + normalizedNumber);
-			navigation.navigate("Verification", [normalizedNumber, sanitizedNumber, countryCode, verificationId]);
+			console.log("Sent code to: " + normalizedNumber);
+			navigation.navigate("Verification", [
+				normalizedNumber,
+				sanitizedNumber,
+				countryCode,
+				verificationId,
+				confirmation,
+			]);
 		} catch (err) {
 			console.log(err);
 		}
