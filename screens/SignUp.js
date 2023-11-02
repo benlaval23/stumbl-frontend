@@ -62,7 +62,7 @@ const SignUp = ({ navigation }) => {
 
 		try {
 			const confirmation = await auth().signInWithPhoneNumber(phoneNumber);
-			confirmation
+			// confirmation
 			// const phoneProvider = new PhoneAuthProvider(auth);
 			// const verificationId = await phoneProvider.verifyPhoneNumber(
 			// 	fullPhoneNumber,
@@ -136,12 +136,12 @@ const SignUp = ({ navigation }) => {
 			/>
 			{isInvalid && <Text style={styles.warningText}>{errorMessage}</Text>}
 			<View style={styles.captcha}>
-				<FirebaseRecaptchaVerifierModal
+				{/* <FirebaseRecaptchaVerifierModal
 					ref={recaptchaVerifier}
 					firebaseConfig={app.options}
 					attemptInvisibleVerification={true}
 				/>
-				<FirebaseRecaptchaBanner />
+				<FirebaseRecaptchaBanner /> */}
 			</View>
 		</KeyboardAvoidingView>
 	);
