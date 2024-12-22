@@ -26,7 +26,9 @@ Get notified when your friends are nearby.
 3. Install dependencies:  
    ```bash
    pnpm install
-   ```  
+   ```
+4. Set up firebase credentials
+5. Set up expo credentials
 
 ---
 
